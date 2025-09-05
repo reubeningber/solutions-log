@@ -1,43 +1,28 @@
-/* Layout polish */
-.header { padding-top: 1rem; padding-bottom: 0.5rem; position: sticky; top: 0; background: var(--pico-background-color); z-index: 10; border-bottom: 1px solid var(--pico-muted-border-color); }
-.header nav { margin-bottom: .25rem; }
-.tagline { color: var(--pico-muted-color); margin: 0 0 1rem; }
-.footer { margin: 3rem 0 2rem; color: var(--pico-muted-color); }
-
-/* Tag filters */
-/* Filter bar */
-.filters { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin: 1rem 0; }
-.filters strong { margin-right: .25rem; }
-
-/* Make filter buttons solid pills (readable on Zinc) */
-.filters .tag {
-  display: inline-flex; align-items: center; font: inherit; cursor: pointer;
-  border-radius: 999px; border: 1px solid var(--pico-muted-border-color);
-  padding: .45rem .75rem;
-  /* neutral background so text never goes white on white */
-  background: var(--pico-muted-border-color);
-  color: inherit;
+/* ===========================
+   Header
+   =========================== */
+.site-header {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--pico-background-color);
+  border-bottom: 1px solid var(--pico-muted-border-color);
+  padding: 1.25rem 0 .75rem;
 }
-.filters .tag:hover { filter: brightness(0.98); }
-.filters .tag.active {
-  /* use theme primary for the active pill */
-  background: var(--pico-primary-background);
-  color: var(--pico-primary-inverse);
-  border-color: var(--pico-primary);
-}
+.brand { display: flex; align-items: center; gap: .75rem; }
+.logo { display: inline-flex; align-items: center; justify-content: center; }
+.site-title { margin: 0; font-size: clamp(1.7rem, 3vw, 2.35rem); font-weight: 800; line-height: 1.05; }
+.site-title a { color: inherit; text-decoration: none; }
+.site-subtitle { margin: .15rem 0 0; color: var(--pico-muted-color); font-size: .95rem; }
 
-/* Tag “chips” inside cards */
-.tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: .25rem 0 .6rem; }
-.chip {
-  display: inline-flex; align-items: center; line-height: 1;
-  padding: .25rem .6rem; border-radius: 999px;
-  border: 1px solid var(--pico-muted-border-color);
-  background: var(--pico-muted-border-color);
-  font-size: .85rem;
-}
+.logo, .logo-img { display:inline-flex; align-items:center; justify-content:center; }
+.brand { gap: .7rem; } /* a touch more breathing room */
 
-/* Entries Grid */
-.entries-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin: 1rem 0 2rem; }
+/* ===========================
+   Index: card grid + cards
+   =========================== */
+.entries-grid {
+  display: grid; grid-template-columns: 1fr; gap: 1rem;
+  margin: 1rem 0 1.25rem;
+}
 @media (min-width: 900px) { .entries-grid { gap: 1.25rem; } }
 
 .entry {
@@ -50,155 +35,150 @@
 }
 .entry:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.05); }
 
-/* Entry header: stacked on mobile, split on wide screens */
-.entry-head {
-  display: flex;
-  flex-direction: column;
-  gap: .25rem;
-  margin-bottom: .35rem;
-}
+/* Title | Date */
+.entry-head { display: flex; flex-direction: column; gap: .25rem; margin-bottom: .35rem; }
 @media (min-width: 768px) {
-  .entry-head {
-    display: grid;
-    grid-template-columns: 1fr auto; /* title | date */
-    align-items: baseline;
-    column-gap: .75rem;
-  }
-  .entry-date { text-align: right; }
+  .entry-head { display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: .75rem; }
+  .entry-date { justify-self: end; text-align: right; }
 }
-
 .entry-title { margin: 0; }
 .entry-title a { font-weight: 700; }
-.entry-date{
-  padding:.2rem .6rem;
-  border-radius:999px;
-  border:1px solid var(--pico-muted-border-color);
-  background:var(--pico-muted-border-color);
-  font-size:.82rem; line-height:1; white-space:nowrap;
+.entry-date {
+  padding: .2rem .6rem; border-radius: 999px;
+  border: 1px solid var(--pico-muted-border-color);
+  background: var(--pico-muted-border-color);
+  font-size: .82rem; line-height: 1; white-space: nowrap;
 }
-@media (min-width:768px){ .entry-date{ justify-self:end; text-align:right; } }
 
-.entry-title { margin: 0; }
-.entry-title a { font-weight: 700; }
-
+/* Chips + excerpt */
 .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: .25rem 0 .6rem; }
 .chip {
-  display: inline-flex; align-items: center;
-  padding: .25rem .55rem; border-radius: 999px;
+  display: inline-flex; align-items: center; line-height: 1;
+  padding: .25rem .6rem; border-radius: 999px;
   border: 1px solid var(--pico-muted-border-color);
+  background: var(--pico-muted-border-color);
   font-size: .85rem;
 }
-
 .excerpt { margin: 0; color: var(--pico-muted-color); }
 
-/* Filter bar (unchanged but kept here for completeness) */
-.filters { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin: 1rem 0; }
-.filters strong { margin-right: .25rem; }
-.filters .tag { --pad: .4rem .7rem; display: inline-flex; align-items: center; border: 1px solid var(--pico-muted-border-color); border-radius: 999px; padding: var(--pad); background: transparent; cursor: pointer; font: inherit; }
-.filters .tag.active { background: var(--pico-muted-border-color); }
-.filters .tag:hover { filter: brightness(0.98); }
+#no-results[hidden] { display: none; }
+#no-results { margin: .25rem 0 1rem; color: var(--pico-muted-color); }
 
-/* Pagefind spacing */
-#search { margin: .5rem 0 1rem; }
+/* ===========================
+   Tools (filters + search) at bottom
+   =========================== */
+.tools {
+  margin: 1.25rem 0 1.5rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--pico-muted-border-color);
+}
+.compact-tools { font-size: .92rem; }
 
+.compact-tools .filters {
+  display: flex; gap: .4rem; align-items: center; flex-wrap: wrap;
+  margin: 0 0 .5rem;
+}
+.compact-tools .filters strong { margin-right: .25rem; font-weight: 600; font-size: .9em; }
 
-/* Pagefind container spacing */
-#search { margin: .5rem 0 1rem; }
+/* solid, readable filter pills */
+.compact-tools .tag {
+  display: inline-flex; align-items: center; cursor: pointer; font: inherit;
+  padding: .35rem .6rem; border-radius: 999px;
+  border: 1px solid var(--pico-muted-border-color);
+  background: var(--pico-muted-border-color);
+  color: inherit;
+}
+.compact-tools .tag.active {
+  background: var(--pico-primary-background);
+  color: var(--pico-primary-inverse);
+  border-color: var(--pico-primary);
+}
 
-/* Accessible skip link */
-.skip-link { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
-.skip-link:focus { left: 1rem; top: 1rem; width: auto; height: auto; background: var(--pico-primary-background); color: var(--pico-primary-inverse); padding: .5rem .75rem; border-radius: .5rem; }
+/* Pagefind search compactness (without relying on internal classes) */
+#search { margin: .25rem 0 0; }
+#search input[type="search"], #search input[type="text"] { font-size: .9rem; padding: .4rem .55rem; }
+#search button { font-size: .9rem; }
 
-/* Dark mode tweaks (Pico already supports prefers-color-scheme) */
+/* ===========================
+   Entry page (detail)
+   =========================== */
+.entry-page {
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 14px;
+  padding: 1.25rem 1.25rem 1rem;
+  background: var(--pico-card-background-color, var(--pico-background-color));
+  box-shadow: 0 1px 0 rgba(0,0,0,.03);
+}
+.entry-page .crumbs { margin-bottom: .5rem; }
+.entry-page .crumbs a { color: var(--pico-muted-color); text-decoration: none; }
+.entry-page .crumbs a:hover { text-decoration: underline; }
+
+/* reuse .entry-head / .entry-date styles */
+
+/* Bottom meta (references + tags) */
+.entry-meta {
+  margin-top: 1.25rem; padding-top: 1rem;
+  border-top: 1px solid var(--pico-muted-border-color);
+  display: grid; gap: .75rem;
+}
+
+/* Inline references (label + pipe-separated items) */
+.inline-refs { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
+.inline-refs strong { margin-right: .25rem; }
+.refs-list { display: inline-flex; flex-wrap: wrap; align-items: center; }
+.refs-list a, .refs-list span { white-space: nowrap; }
+.refs-list > * + * { margin-left: .5rem; }
+.refs-list > * + *::before {
+  content: "|"; margin-right: .5rem; color: var(--pico-muted-color);
+}
+.icon-link { width: .95em; height: .95em; stroke: currentColor; margin-left: .25rem; }
+
+/* Thin rule between references and tags */
+hr.meta-sep {
+  margin: .75rem 0; border: none;
+  border-top: 1px solid var(--pico-muted-border-color);
+}
+
+.entry-footer-actions { display: flex; justify-content: flex-end; margin-top: .5rem; }
+
+/* ===========================
+   Accessibility
+   =========================== */
+.skip-link {
+  position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden;
+}
+.skip-link:focus {
+  left: 1rem; top: 1rem; width: auto; height: auto;
+  background: var(--pico-primary-background); color: var(--pico-primary-inverse);
+  padding: .5rem .75rem; border-radius: .5rem;
+}
+
+/* ===========================
+   Optional: dark mode tweak (even if data-theme="light", harmless)
+   =========================== */
 @media (prefers-color-scheme: dark) {
-  .entry { box-shadow: 0 1px 0 rgba(0,0,0,.2); }
+  .entry, .entry-page { box-shadow: 0 1px 0 rgba(0,0,0,.2); }
 }
 
-/* Small helper for the index excerpt truncation if needed */
-.entry p { margin: 0; }
+/* ===========================
+   Site Footer (with horizontal line)
+   =========================== */
+.site-footer{
+  /* center the footer block itself */
+  margin: 2rem auto 2.5rem;
+  padding-top: 1rem;
+  max-width: var(--pico-container-width, 1200px); /* keeps it aligned with the page */
+  text-align: center;
+  display: grid;
+  gap: .35rem;
+  justify-items: center;
 
-#no-results[hidden]{ display:none; }
-#no-results{ margin:.25rem 0 1rem; color:var(--pico-muted-color); }
-
-/* Entry page container */
-.entry-page{
-  border:1px solid var(--pico-muted-border-color);
-  border-radius:14px;
-  padding:1.25rem 1.25rem 1rem;
-  background:var(--pico-card-background-color, var(--pico-background-color));
-  box-shadow:0 1px 0 rgba(0,0,0,.03);
-}
-.entry-page .crumbs{ margin-bottom:.5rem; }
-.entry-page .crumbs a{ color:var(--pico-muted-color); text-decoration:none; }
-.entry-page .crumbs a:hover{ text-decoration:underline; }
-
-/* Title | Date (same pattern as homepage) */
-.entry-head{ display:flex; flex-direction:column; gap:.25rem; margin-bottom:.5rem; }
-@media (min-width:768px){
-  .entry-head{ display:grid; grid-template-columns:1fr auto; align-items:baseline; column-gap:.75rem; }
-  .entry-date{ justify-self:end; text-align:right; }
-}
-.entry-title{ margin:0; font-weight:800; }
-
-/* Date pill */
-.entry-date{
-  padding:.2rem .6rem; border-radius:999px;
-  border:1px solid var(--pico-muted-border-color);
-  background:var(--pico-muted-border-color);
-  font-size:.82rem; line-height:1; white-space:nowrap;
+  /* divider inside the container */
+  border-top: 1px solid var(--pico-muted-border-color);
 }
 
-/* Bottom meta area */
-.entry-meta{
-  margin-top:1.25rem; padding-top:1rem;
-  border-top:1px solid var(--pico-muted-border-color);
-  display:grid; gap:.75rem;
+.site-footer .footer-meta,
+.site-footer .footer-copy{
+  color: var(--pico-muted-color);
 }
 
-/* References list with link icon */
-.entry-refs ul{ list-style:none; padding:0; margin:.25rem 0 0; }
-.entry-refs li{ display:flex; align-items:center; gap:.4rem; }
-.entry-refs a{ display:inline-flex; align-items:center; gap:.35rem; text-decoration:none; }
-.entry-refs a:hover{ text-decoration:underline; }
-.icon-link{ width:1em; height:1em; stroke:currentColor; }
-
-/* Tag chips at bottom */
-.tags{ display:flex; flex-wrap:wrap; gap:.4rem; margin:.1rem 0 .25rem; }
-.chip{
-  display:inline-flex; align-items:center; line-height:1;
-  padding:.25rem .6rem; border-radius:999px;
-  border:1px solid var(--pico-muted-border-color);
-  background:var(--pico-muted-border-color);
-  font-size:.85rem;
-}
-
-.entry-footer-actions{ display:flex; justify-content:flex-end; margin-top:.5rem; }
-
-/* Inline References (label + pipe-separated refs) */
-.inline-refs{ display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; }
-.inline-refs strong{ margin-right:.25rem; }
-
-.refs-list{
-  display:inline-flex;
-  flex-wrap:wrap;
-  align-items:center;
-}
-.refs-list a, .refs-list span{ white-space:nowrap; }
-
-/* Pipe separator between items */
-.refs-list > * + *{ margin-left:.5rem; }
-.refs-list > * + *::before{
-  content:"|";
-  margin-right:.5rem;
-  color:var(--pico-muted-color);
-}
-
-/* Link icon sizing */
-.icon-link{ width:.95em; height:.95em; stroke:currentColor; margin-left:.25rem; }
-
-/* Thin separator between references and tags */
-hr.meta-sep{
-  margin:.75rem 0;
-  border:none;
-  border-top:1px solid var(--pico-muted-border-color);
-}

@@ -4,24 +4,6 @@ eleventyExcludeFromCollections: true
 title: Solutions Log
 ---
 
-<!-- Search (Pagefind UI mounts here when the bundle exists) -->
-<div id="search"></div>
-
-<!-- Tag filters -->
-{% set counts = collections.entries | tagCounts %}
-
-<div class="filters">
-  <strong>Filter by tag:</strong>
-  <button class="tag active" data-tag="all">All ({{ collections.entries | length }})</button>
-  {% for tag in collections.entries | uniquetags %}
-    <button class="tag" data-tag="{{ tag }}">{{ tag }} ({{ counts[tag] }})</button>
-  {% endfor %}
-</div>
-
-
-<p id="no-results" hidden><em>No entries match this filter.</em></p>
-
-<!-- Card grid -->
 <section id="entries" class="entries-grid">
   {% for post in collections.entries %}
   <article class="entry" data-tags="{{ (post.data.tags or []).join('||') }}">
@@ -41,54 +23,53 @@ title: Solutions Log
       {% endfor %}
     </div>
     {% endif %}
+
+    <p class="excerpt">
+      {{ post.templateContent | striptags | truncate(180, true, "…") }}
+    </p>
   </article>
   {% endfor %}
 </section>
 
+<p id="no-results" hidden><em>No entries match this filter.</em></p>
+
+<!-- Tools at the bottom: compact filters + search -->
+<section class="tools compact-tools">
+  <div class="filters">
+    <strong>Filter by tag:</strong>
+    <button data-tag="all" class="tag active">All</button>
+    {% for tag in collections.entries | uniquetags %}
+      <button class="tag" data-tag="{{ tag }}">{{ tag }}</button>
+    {% endfor %}
+  </div>
+
+  <!-- Pagefind renders here -->
+  <div id="search"></div>
+</section>
+
 <script>
+  // Tag filter (unchanged)
   const tagButtons = document.querySelectorAll(".filters .tag");
   const cards = document.querySelectorAll(".entries-grid .entry");
   const noResults = document.getElementById("no-results");
 
-  function setActive(btn){
-    tagButtons.forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
-    btn.classList.add("active");
-    btn.setAttribute("aria-pressed","true");
-  }
-  function applyFilter(tag){
-    let shown=0;
-    cards.forEach(card=>{
-      const set=(card.dataset.tags||"").split("||").filter(Boolean);
-      const match = tag==="all" || set.includes(tag);
+  function applyFilter(tag) {
+    let shown = 0;
+    cards.forEach(card => {
+      const set = (card.dataset.tags || "").split("||").filter(Boolean);
+      const match = tag === "all" || set.includes(tag);
       card.hidden = !match;
-      if(match) shown++;
+      if (match) shown++;
     });
-    noResults.hidden = shown!==0;
+    noResults.hidden = shown !== 0;
   }
-  function updateURL(tag){
-    const url=new URL(window.location);
-    if(tag==="all"){ url.searchParams.delete("tag"); }
-    else { url.searchParams.set("tag", tag); }
-    history.replaceState(null,"",url);
-  }
-  function init(){
-    const urlTag=new URL(window.location).searchParams.get("tag") || "all";
-    const initial = Array.from(tagButtons).find(b => b.dataset.tag===urlTag) || tagButtons[0];
-    setActive(initial);
-    applyFilter(initial.dataset.tag);
-    updateURL(initial.dataset.tag);
-  }
-  tagButtons.forEach(btn=>{
-    btn.setAttribute("aria-pressed","false");
-    btn.addEventListener("click", ()=>{
-      setActive(btn);
-      applyFilter(btn.dataset.tag);
-      updateURL(btn.dataset.tag);
-    });
-    btn.addEventListener("keydown",(e)=>{
-      if(e.key===" "||e.key==="Enter"){ e.preventDefault(); btn.click(); }
-    });
-  });
-  init();
-</script>
 
+  tagButtons.forEach(btn => btn.addEventListener("click", () => {
+    tagButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    applyFilter(btn.dataset.tag);
+  }));
+
+  // Initialize (show all by default)
+  applyFilter("all");
+</script>

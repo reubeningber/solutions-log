@@ -5,64 +5,45 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Solutions Log</title>
   <meta name="description" content="A log of the solutions and decisions I drive as an Engineering Manager — showcasing impact beyond code." />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  
 
-  <!-- Pico.css (small, classless/class-light) -->
+  <!-- Pico Zinc -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.zinc.min.css">
-
-  <!-- Your custom tweaks -->
+  <!-- Your custom CSS -->
   <link rel="stylesheet" href="/assets/styles.css" />
 
   <!-- Pagefind UI -->
   <link rel="stylesheet" href="/_pagefind/pagefind-ui.css">
   <script src="/_pagefind/pagefind-ui.js" defer></script>
-
-  <meta name="theme-color" content="#ffffff" />
 </head>
 <body>
-  <header class="container header">
-    <nav>
-      <ul>
-        <li><strong><a href="/" aria-label="Home">Solutions Log</a></strong></li>
-      </ul>
-      <ul>
-        <li><small>© 2025</small></li>
-      </ul>
-    </nav>
-    <p class="tagline">
-      A log of the solutions and decisions I drive as an Engineering Manager — showcasing impact beyond code.
-    </p>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="container site-header">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            width="40" height="40" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <!-- Bulb outline -->
+          <path d="M12 3a6 6 0 0 0-6 6c0 2 .8 3.5 2.1 4.9.7.8 1.2 1.8 1.4 2.9h5c.2-1.1.7-2.1 1.4-2.9C17.2 12.5 18 11 18 9a6 6 0 0 0-6-6Z"/>
+          <!-- Bulb base -->
+          <path d="M9 18h6M10 21h4"/>
+          <!-- Emitting rays -->
+          <path d="M12 1.5v2.2M5 3.2l1.2 2.1M19 3.2l-1.2 2.1M2.5 9h2.3M21.5 9h-2.3M6.2 14.8l-2 1.2M17.8 14.8l2 1.2"/>
+        </svg>
+      </span>
+
+      <div class="brand-text">
+        <h1 class="site-title"><a href="/">Solutions Log</a></h1>
+        <p class="site-subtitle">A log of the solutions and decisions I drive as an Engineering Manager — showcasing impact beyond code.</p>
+      </div>
+    </div>
   </header>
 
   <main id="main" class="container">
     
-<!-- Search (Pagefind UI mounts here when the bundle exists) -->
-<div id="search"></div>
-
-<!-- Tag filters -->
-
-
-<div class="filters">
-  <strong>Filter by tag:</strong>
-  <button class="tag active" data-tag="all">All (4)</button>
-  
-    <button class="tag" data-tag="Cross-Team Alignment">Cross-Team Alignment (2)</button>
-  
-    <button class="tag" data-tag="Process Improvement">Process Improvement (1)</button>
-  
-    <button class="tag" data-tag="Quality / Standards">Quality / Standards (2)</button>
-  
-    <button class="tag" data-tag="Risk Mitigation">Risk Mitigation (3)</button>
-  
-    <button class="tag" data-tag="Scope Management">Scope Management (1)</button>
-  
-    <button class="tag" data-tag="Technical Contribution">Technical Contribution (1)</button>
-  
-</div>
-
-
-<p id="no-results" hidden><em>No entries match this filter.</em></p>
-
-<!-- Card grid -->
 <section id="entries" class="entries-grid">
   
   <article class="entry" data-tags="Quality / Standards||Risk Mitigation">
@@ -84,6 +65,10 @@
       
     </div>
     
+
+    <p class="excerpt">
+      Context On a number of occasions we have forgotton to include the fastly query parameters to load the appropriate image size for the feature. In Sprint Planning there was a ticket …
+    </p>
   </article>
   
   <article class="entry" data-tags="Scope Management||Cross-Team Alignment||Risk Mitigation">
@@ -107,6 +92,10 @@
       
     </div>
     
+
+    <p class="excerpt">
+      Context Ticket was broad and complex, making scope unclear and timeline unrealistic. My Contribution Completed a thorough review using Jira AI to break down the work into five key …
+    </p>
   </article>
   
   <article class="entry" data-tags="Technical Contribution||Quality / Standards">
@@ -128,6 +117,10 @@
       
     </div>
     
+
+    <p class="excerpt">
+      Context The initial implementation had a rigid A/B test design, making the component less reusable. Was told that the engineers&#39; attempts to create a loop failed. My Contribution P…
+    </p>
   </article>
   
   <article class="entry" data-tags="Cross-Team Alignment||Process Improvement||Risk Mitigation">
@@ -151,65 +144,80 @@
       
     </div>
     
+
+    <p class="excerpt">
+      Context The initial implementation by Engagement Engineers took several sprints but was not acceptable when reviewed by Creation engineers. Work wasn’t aligned with current Muse st…
+    </p>
   </article>
   
 </section>
 
+<p id="no-results" hidden><em>No entries match this filter.</em></p>
+
+<!-- Tools at the bottom: compact filters + search -->
+<section class="tools compact-tools">
+  <div class="filters">
+    <strong>Filter by tag:</strong>
+    <button data-tag="all" class="tag active">All</button>
+    
+      <button class="tag" data-tag="Cross-Team Alignment">Cross-Team Alignment</button>
+    
+      <button class="tag" data-tag="Process Improvement">Process Improvement</button>
+    
+      <button class="tag" data-tag="Quality / Standards">Quality / Standards</button>
+    
+      <button class="tag" data-tag="Risk Mitigation">Risk Mitigation</button>
+    
+      <button class="tag" data-tag="Scope Management">Scope Management</button>
+    
+      <button class="tag" data-tag="Technical Contribution">Technical Contribution</button>
+    
+  </div>
+
+  <!-- Pagefind renders here -->
+  <div id="search"></div>
+</section>
+
 <script>
+  // Tag filter (unchanged)
   const tagButtons = document.querySelectorAll(".filters .tag");
   const cards = document.querySelectorAll(".entries-grid .entry");
   const noResults = document.getElementById("no-results");
 
-  function setActive(btn){
-    tagButtons.forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
-    btn.classList.add("active");
-    btn.setAttribute("aria-pressed","true");
-  }
-  function applyFilter(tag){
-    let shown=0;
-    cards.forEach(card=>{
-      const set=(card.dataset.tags||"").split("||").filter(Boolean);
-      const match = tag==="all" || set.includes(tag);
+  function applyFilter(tag) {
+    let shown = 0;
+    cards.forEach(card => {
+      const set = (card.dataset.tags || "").split("||").filter(Boolean);
+      const match = tag === "all" || set.includes(tag);
       card.hidden = !match;
-      if(match) shown++;
+      if (match) shown++;
     });
-    noResults.hidden = shown!==0;
+    noResults.hidden = shown !== 0;
   }
-  function updateURL(tag){
-    const url=new URL(window.location);
-    if(tag==="all"){ url.searchParams.delete("tag"); }
-    else { url.searchParams.set("tag", tag); }
-    history.replaceState(null,"",url);
-  }
-  function init(){
-    const urlTag=new URL(window.location).searchParams.get("tag") || "all";
-    const initial = Array.from(tagButtons).find(b => b.dataset.tag===urlTag) || tagButtons[0];
-    setActive(initial);
-    applyFilter(initial.dataset.tag);
-    updateURL(initial.dataset.tag);
-  }
-  tagButtons.forEach(btn=>{
-    btn.setAttribute("aria-pressed","false");
-    btn.addEventListener("click", ()=>{
-      setActive(btn);
-      applyFilter(btn.dataset.tag);
-      updateURL(btn.dataset.tag);
-    });
-    btn.addEventListener("keydown",(e)=>{
-      if(e.key===" "||e.key==="Enter"){ e.preventDefault(); btn.click(); }
-    });
-  });
-  init();
-</script>
 
+  tagButtons.forEach(btn => btn.addEventListener("click", () => {
+    tagButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    applyFilter(btn.dataset.tag);
+  }));
+
+  // Initialize (show all by default)
+  applyFilter("all");
+</script>
 
   </main>
 
-  <footer class="container footer">
-    <small>Built with Eleventy • Search by Pagefind</small>
+  <footer class="container site-footer">
+    <div class="footer-meta">
+      <small>Built with Eleventy • Search by Pagefind</small>
+    </div>
+    <div class="footer-copy">
+      <small>© 2025 • Reuben Ingber, Engineering Manager</small>
+    </div>
   </footer>
 
   <script>
+    // Mount Pagefind UI only if #search exists (we moved it to the bottom of the index page)
     document.addEventListener("DOMContentLoaded", () => {
       const el = document.getElementById("search");
       if (el && window.PagefindUI) {
