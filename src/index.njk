@@ -1,0 +1,94 @@
+---
+layout: layout.njk
+eleventyExcludeFromCollections: true
+title: Solutions Log
+---
+
+<!-- Search (Pagefind UI mounts here when the bundle exists) -->
+<div id="search"></div>
+
+<!-- Tag filters -->
+{% set counts = collections.entries | tagCounts %}
+
+<div class="filters">
+  <strong>Filter by tag:</strong>
+  <button class="tag active" data-tag="all">All ({{ collections.entries | length }})</button>
+  {% for tag in collections.entries | uniquetags %}
+    <button class="tag" data-tag="{{ tag }}">{{ tag }} ({{ counts[tag] }})</button>
+  {% endfor %}
+</div>
+
+
+<p id="no-results" hidden><em>No entries match this filter.</em></p>
+
+<!-- Card grid -->
+<section id="entries" class="entries-grid">
+  {% for post in collections.entries %}
+  <article class="entry" data-tags="{{ (post.data.tags or []).join('||') }}">
+    <header class="entry-head">
+      <h3 class="entry-title">
+        <a href="{{ post.url }}">{{ post.data.title }}</a>
+      </h3>
+      <time datetime="{{ post.date | date('yyyy-MM-dd') }}" class="entry-date">
+        {{ post.date | date("yyyy-MM-dd") }}
+      </time>
+    </header>
+
+    {% if post.data.tags and post.data.tags.length %}
+    <div class="tags">
+      {% for t in post.data.tags %}
+        <span class="chip">{{ t }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </article>
+  {% endfor %}
+</section>
+
+<script>
+  const tagButtons = document.querySelectorAll(".filters .tag");
+  const cards = document.querySelectorAll(".entries-grid .entry");
+  const noResults = document.getElementById("no-results");
+
+  function setActive(btn){
+    tagButtons.forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
+    btn.classList.add("active");
+    btn.setAttribute("aria-pressed","true");
+  }
+  function applyFilter(tag){
+    let shown=0;
+    cards.forEach(card=>{
+      const set=(card.dataset.tags||"").split("||").filter(Boolean);
+      const match = tag==="all" || set.includes(tag);
+      card.hidden = !match;
+      if(match) shown++;
+    });
+    noResults.hidden = shown!==0;
+  }
+  function updateURL(tag){
+    const url=new URL(window.location);
+    if(tag==="all"){ url.searchParams.delete("tag"); }
+    else { url.searchParams.set("tag", tag); }
+    history.replaceState(null,"",url);
+  }
+  function init(){
+    const urlTag=new URL(window.location).searchParams.get("tag") || "all";
+    const initial = Array.from(tagButtons).find(b => b.dataset.tag===urlTag) || tagButtons[0];
+    setActive(initial);
+    applyFilter(initial.dataset.tag);
+    updateURL(initial.dataset.tag);
+  }
+  tagButtons.forEach(btn=>{
+    btn.setAttribute("aria-pressed","false");
+    btn.addEventListener("click", ()=>{
+      setActive(btn);
+      applyFilter(btn.dataset.tag);
+      updateURL(btn.dataset.tag);
+    });
+    btn.addEventListener("keydown",(e)=>{
+      if(e.key===" "||e.key==="Enter"){ e.preventDefault(); btn.click(); }
+    });
+  });
+  init();
+</script>
+

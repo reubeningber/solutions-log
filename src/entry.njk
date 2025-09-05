@@ -1,0 +1,68 @@
+---
+layout: layout.njk
+---
+
+<article class="entry-page">
+  <nav class="crumbs">
+    <a href="{{ '/' | url }}">&larr; Back to all entries</a>
+  </nav>
+
+  <header class="entry-head">
+    <h1 class="entry-title">{{ title }}</h1>
+    <time datetime="{{ page.date | date('yyyy-MM-dd') }}" class="entry-date">
+      {{ page.date | date("yyyy-MM-dd") }}
+    </time>
+  </header>
+
+  {# Main content is what Pagefind indexes #}
+  <main data-pagefind-body class="entry-prose">
+    {{ content | safe }}
+  </main>
+
+  {# Gather references from either 'references' (array) or 'reference' (string) #}
+  {% set refItems = [] %}
+  {% if references %}
+    {% set refItems = references %}
+  {% elif reference %}
+    {% set refItems = [ reference ] %}
+  {% endif %}
+
+  {% set refItems = (references or reference) | normalizeRefs %}
+
+  <footer class="entry-meta">
+    {% if refItems and refItems.length %}
+    <div class="entry-refs inline-refs">
+      {# <strong>References</strong> #}
+      <div class="refs-list">
+        {% for r in refItems %}
+          {% if r.url %}
+            <a href="{{ r.url }}" target="_blank" rel="noopener">
+              {{ r.label }}
+              <svg class="icon-link" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 1 0-7.07-7.07L10 5" />
+                <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 1 0 7.07 7.07L14 19" />
+              </svg>
+            </a>
+          {% else %}
+            <span>{{ r.text }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if refItems and refItems.length %}
+      <hr class="meta-sep">
+    {% endif %}
+
+    {% if tags and tags.length %}
+    <div class="tags">
+      {% for t in tags %}<span class="chip">{{ t }}</span>{% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="entry-footer-actions">
+      <a href="{{ '/' | url }}" role="button" class="back-btn">Back to list</a>
+    </div>
+  </footer>
+</article>

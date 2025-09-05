@@ -1,0 +1,11 @@
+site: _site
+bundle_dir: _pagefind
+# Only index rendered entry pages
+glob: "entries/**/*.html"
+
+# Strip UI chrome from the index (acts like data-pagefind-ignore)
+exclude_selectors:
+  - "nav"
+  - "footer"
+  - ".filters"
+  - ".meta"

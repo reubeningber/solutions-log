@@ -1,0 +1,13 @@
+{
+  "name": "solutions-log",
+  "private": true,
+  "scripts": {
+    "build": "ELEVENTY_ENV=prod npx @11ty/eleventy && npx pagefind",
+    "dev": "npx @11ty/eleventy --serve --watch"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0",
+    "pagefind": "^1.1.0",
+    "staticrypt": "^3.5.4"
+  }
+}
