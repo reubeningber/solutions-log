@@ -10,60 +10,57 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - name: Install deps
+        run: npm ci
 
-      # Build Eleventy
+      # 1) Build Eleventy
       - name: Build site
         run: npm run build
 
-      # (Optional) Pagefind index
+      # 2) (Optional) Build Pagefind index
       - name: Build Pagefind index
         run: npx pagefind --source _site
 
-      # Sanity check: confirm Eleventy produced a root index.html
+      # 3) Sanity check: _site has a root index.html
       - name: Verify _site contents
         run: |
           ls -la _site | sed -n '1,120p'
           test -f _site/index.html
 
-      # Encrypt *files inside* _site (flattened), recursively
-      # NOTE: use "_site/*" (NOT just "_site") so we don't get an extra "/_site" layer
+      # 4) Encrypt entire _site → encrypted/_site/...
       - name: Encrypt HTML with StatiCrypt
-        run: npx staticrypt "_site/*" "$SITE_PASSWORD" -r --salt "$SALT" -d encrypted --template-title "Solutions Log" --config false
+        run: npx staticrypt _site -r -p "$SITE_PASSWORD" --salt "$SALT" -d encrypted --template-title "Solutions Log" --config false
         env:
           SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
           SALT: ${{ secrets.SALT }}
 
-      # StatiCrypt v3 copies non-HTML files for you; this rsync is optional.
-      # If you want to be explicit, keep it:
-      - name: Copy non-HTML assets
-        run: rsync -a --exclude='**/*.html' _site/ encrypted/
-
-      # Prevent Jekyll & verify the artifact root has index.html
-      - run: touch encrypted/.nojekyll
-
-      - name: Verify artifact root
+      # 5) Flatten: move encrypted/_site/* → encrypted/
+      - name: Flatten encrypted output
+        shell: bash
         run: |
-          ls -la encrypted | sed -n '1,120p'
-          test -f encrypted/index.html
+          shopt -s dotglob
+          if [ -d encrypted/_site ]; then
+            mv encrypted/_site/* encrypted/
+            rmdir encrypted/_site
+          fi
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      # 6) Copy non-HTML assets (belt & suspenders; StatiCrypt v3+ usually copies)
+      - name: Copy non-HTML assets
+        run: rsync -a --exc
