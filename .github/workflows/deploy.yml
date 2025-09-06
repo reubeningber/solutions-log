@@ -23,39 +23,40 @@ jobs:
 
       - run: npm ci
 
-      # 1) Build Eleventy
+      # Build Eleventy
       - name: Build site
         run: npm run build
 
-      # 2) (optional) Build Pagefind index
+      # (Optional) Pagefind index
       - name: Build Pagefind index
         run: npx pagefind --source _site
 
-      # 3) Encrypt ALL HTML, preserving paths relative to _site
-      #    IMPORTANT: pass the DIRECTORY (_site), not a glob
+      # Sanity check: confirm Eleventy produced a root index.html
+      - name: Verify _site contents
+        run: |
+          ls -la _site | sed -n '1,120p'
+          test -f _site/index.html
+
+      # Encrypt *files inside* _site (flattened), recursively
+      # NOTE: use "_site/*" (NOT just "_site") so we don't get an extra "/_site" layer
       - name: Encrypt HTML with StatiCrypt
-        run: npx staticrypt _site "$SITE_PASSWORD" --recursive --salt "$SALT" --output-dir encrypted --template-title "Solutions Log"
+        run: npx staticrypt "_site/*" "$SITE_PASSWORD" -r --salt "$SALT" -d encrypted --template-title "Solutions Log" --config false
         env:
           SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
           SALT: ${{ secrets.SALT }}
 
-      # 4) Copy non-HTML assets (CSS, JS, images, Pagefind bundle) to encrypted/
+      # StatiCrypt v3 copies non-HTML files for you; this rsync is optional.
+      # If you want to be explicit, keep it:
       - name: Copy non-HTML assets
         run: rsync -a --exclude='**/*.html' _site/ encrypted/
 
-      # 5) Prevent any Jekyll processing
+      # Prevent Jekyll & verify the artifact root has index.html
       - run: touch encrypted/.nojekyll
 
-      # 6) Sanity check — ensure /index.html exists at artifact root
-      - name: Verify artifact
+      - name: Verify artifact root
         run: |
           ls -la encrypted | sed -n '1,120p'
           test -f encrypted/index.html
-
-      # 7) Upload artifact
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: encrypted
 
   deploy:
     needs: build
