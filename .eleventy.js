@@ -90,6 +90,8 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
   eleventyConfig.addWatchTarget("src/assets");
 
+  const pathPrefix = "/solutions-log/";   // <— important
+
   return {
     dir: { input: "src", includes: ".", data: "_data", output: "_site" },
     markdownTemplateEngine: "njk",
