@@ -1,7 +1,9 @@
 name: Build, Encrypt, and Deploy (StatiCrypt)
+
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,28 +15,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - run: npm ci
-      # 1) Build Eleventy + Pagefind
-      - run: npm run build
 
-      # 2) Encrypt HTML into ./encrypted
-      - run: npx staticrypt "_site/**/*.html" "$SITE_PASSWORD" --recursive --salt "$SALT" --output-dir encrypted --template-title "Solutions Log"
+      # 1) Build Eleventy
+      - name: Build site
+        run: npm run build
+
+      # 2) (optional) Build Pagefind index
+      - name: Build Pagefind index
+        run: npx pagefind --source _site
+
+      # 3) Encrypt ALL HTML, preserving paths relative to _site
+      #    IMPORTANT: pass the DIRECTORY (_site), not a glob
+      - name: Encrypt HTML with StatiCrypt
+        run: npx staticrypt _site "$SITE_PASSWORD" --recursive --salt "$SALT" --output-dir encrypted --template-title "Solutions Log"
         env:
           SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
           SALT: ${{ secrets.SALT }}
 
-      # 3) Copy non-HTML assets (CSS, JS, images, and the Pagefind bundle)
-      - run: rsync -a --exclude='**/*.html' _site/ encrypted/
+      # 4) Copy non-HTML assets (CSS, JS, images, Pagefind bundle) to encrypted/
+      - name: Copy non-HTML assets
+        run: rsync -a --exclude='**/*.html' _site/ encrypted/
 
-      # 4) Publish encrypted/
+      # 5) Prevent any Jekyll processing
+      - run: touch encrypted/.nojekyll
+
+      # 6) Sanity check — ensure /index.html exists at artifact root
+      - name: Verify artifact
+        run: |
+          ls -la encrypted | sed -n '1,120p'
+          test -f encrypted/index.html
+
+      # 7) Upload artifact
       - uses: actions/upload-pages-artifact@v3
         with:
           path: encrypted
-  
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
