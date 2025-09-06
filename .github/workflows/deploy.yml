@@ -63,4 +63,30 @@ jobs:
 
       # 6) Copy non-HTML assets (belt & suspenders; StatiCrypt v3+ usually copies)
       - name: Copy non-HTML assets
-        run: rsync -a --exc
+        run: rsync -a --exclude='**/*.html' _site/ encrypted/
+
+      # 7) Prevent Jekyll & verify artifact root has index.html
+      - name: Add .nojekyll
+        run: touch encrypted/.nojekyll
+
+      - name: Verify artifact root
+        run: |
+          ls -la encrypted | sed -n '1,120p'
+          test -f encrypted/index.html
+
+      # 8) Upload artifact for Pages
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: encrypted
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
