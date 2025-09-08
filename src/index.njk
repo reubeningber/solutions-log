@@ -4,9 +4,8 @@ eleventyExcludeFromCollections: true
 title: Solutions Log
 permalink: /index.html
 ---
-
+<!-- debug: {{ collections.entries | length }} entries -->
 <section id="entries" class="entries-grid">
-  <!-- debug: {{ collections.entries | length }} entries -->
   {% for post in collections.entries %}
   <article class="entry"
     data-tags="{% if post.data.tags and post.data.tags.length %}{% for t in post.data.tags %}{{ t | slugify }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}">
