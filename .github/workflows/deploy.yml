@@ -45,23 +45,16 @@ jobs:
           test -f _site/index.html
 
       # 4) Encrypt ALL files in _site (HTML will be encrypted; non-HTML copied)
-      #    IMPORTANT: use env var STATICRYPT_PASSWORD (no -p), keep a stable SALT,
-      #    add your custom template, and ALWAYS remember (localStorage) with --remember 0.
+      #    IMPORTANT: use the env var STATICRYPT_PASSWORD (no -p), and do not quote the glob.
       - name: Encrypt with StatiCrypt
         shell: bash
         env:
           STATICRYPT_PASSWORD: ${{ secrets.SITE_PASSWORD }}
-          SALT: ${{ secrets.SALT }}
         run: |
           set -euo pipefail
           shopt -s nullglob
-          npx -y staticrypt@3 _site/* -r \
-            -d encrypted \
-            --config false \
-            --remember 0 \
-            --salt "$SALT" \
-            -t src/staticrypt_template.html
-          # StatiCrypt writes outputs under ./encrypted/..., including index.html if present
+          npx -y staticrypt@3 _site/* -r -d encrypted --config false
+          # StatiCrypt puts outputs under ./encrypted/..., including index.html if present
 
       # 5) If your StatiCrypt version didn't copy non-HTML, ensure they’re present
       - name: Copy non-HTML assets (safety)
