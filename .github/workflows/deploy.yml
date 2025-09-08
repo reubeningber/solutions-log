@@ -86,7 +86,9 @@ jobs:
               --salt "$SALT" \
               --remember 0 \
               --config false \
-              -t src/staticrypt_template.html \
+              --template-title "Solutions Log" \
+              --template-instructions "Enter password to unlock." \
+              --template-color-primary "#646b79" \
               -o "$out"
               done
       
