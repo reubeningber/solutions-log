@@ -1,0 +1,29 @@
+# Eleventy build output
+/_site/
+
+# Encrypted output (created in CI or locally)
+ /encrypted/
+
+# If you are NOT using "Deploy from branch" to /docs, ignore it too
+# /docs/
+
+# Eleventy cache
+/.cache/
+
+# Pagefind (we generate it inside _site, but ignore any stray roots)
+ /_pagefind/
+
+# Node
+/node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.*
+!.env.example
