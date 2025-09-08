@@ -38,25 +38,46 @@ jobs:
       - name: Build Pagefind index
         run: npx pagefind --source _site
 
-      # 3) Verify Eleventy output has a root index.html
+            # 3) Verify Eleventy output has a root index.html
       - name: Verify _site contents
         run: |
           ls -la _site | sed -n '1,200p'
           test -f _site/index.html
 
-      # 4) Encrypt ALL HTML directly into encrypted/
-      #    IMPORTANT: do NOT quote the glob; Bash must expand _site/* here.
-      - name: Encrypt HTML with StatiCrypt
+      # 4) Encrypt every HTML file explicitly, preserving paths
+      - name: Encrypt HTML with StatiCrypt (file-by-file)
         shell: bash
         env:
           SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
           SALT: ${{ secrets.SALT }}
         run: |
-          shopt -s nullglob      # make unmatched globs expand to empty
-          npx staticrypt _site/* -r -p "$SITE_PASSWORD" --salt "$SALT" \
-            -d encrypted --template-title "Solutions Log" --config false
+          set -euo pipefail
+          shopt -s globstar nullglob
 
-      # 5) Copy non-HTML assets (CSS, JS, images, Pagefind bundle)
+          # collect all html files (root + nested)
+          mapfile -t HTML_FILES < <(printf '%s\n' _site/index.html _site/**/*.html | awk '!x[$0]++')
+
+          if [[ ${#HTML_FILES[@]} -eq 0 ]]; then
+            echo "No HTML files found under _site"; exit 1
+          fi
+
+          mkdir -p encrypted
+
+          for f in "${HTML_FILES[@]}"; do
+            # compute output path under encrypted/
+            rel="${f#_site/}"
+            out="encrypted/${rel}"
+            mkdir -p "$(dirname "$out")"
+
+            # encrypt this file directly to its output path
+            npx staticrypt "$f" \
+              -p "$SITE_PASSWORD" \
+              --salt "$SALT" \
+              --config false \
+              -o "$out"
+          done
+
+      # 5) Copy non-HTML assets (do not overwrite encrypted HTML)
       - name: Copy non-HTML assets
         run: rsync -a --exclude='**/*.html' _site/ encrypted/
 
@@ -67,8 +88,8 @@ jobs:
       - name: Verify artifact root
         run: |
           ls -la encrypted | sed -n '1,200p'
-          # show any index.html we have (debug)
-          find encrypted -maxdepth 3 -name 'index.html' -type f -print
+          # list a few encrypted html files for sanity
+          find encrypted -maxdepth 3 -name '*.html' -type f | sed -n '1,25p'
           test -f encrypted/index.html
 
       # 7) Upload artifact for Pages
