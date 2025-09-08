@@ -30,21 +30,21 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      # 1) Build Eleventy
+      # 1) Build Eleventy output to _site
       - name: Build site
         run: npm run build
 
-      # 2) (optional) Build Pagefind index
+      # 2) Build Pagefind index into _site/_pagefind
       - name: Build Pagefind index
         run: npx pagefind --source _site
 
-            # 3) Verify Eleventy output has a root index.html
+      # 3) Sanity check: _site has a root index.html
       - name: Verify _site contents
         run: |
           ls -la _site | sed -n '1,200p'
           test -f _site/index.html
 
-      # 4) Encrypt every HTML file explicitly, preserving paths
+      # 4) Encrypt HTML files one-by-one, preserving paths under encrypted/
       - name: Encrypt HTML with StatiCrypt (file-by-file)
         shell: bash
         env:
@@ -53,43 +53,38 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s globstar nullglob
+          npx -y staticrypt@3 --version
 
           # collect all html files (root + nested)
           mapfile -t HTML_FILES < <(printf '%s\n' _site/index.html _site/**/*.html | awk '!x[$0]++')
-
-          if [[ ${#HTML_FILES[@]} -eq 0 ]]; then
-            echo "No HTML files found under _site"; exit 1
-          fi
+          echo "Encrypting ${#HTML_FILES[@]} HTML files"
+          [[ ${#HTML_FILES[@]} -gt 0 ]]
 
           mkdir -p encrypted
 
           for f in "${HTML_FILES[@]}"; do
-            # compute output path under encrypted/
             rel="${f#_site/}"
             out="encrypted/${rel}"
             mkdir -p "$(dirname "$out")"
-
-            # encrypt this file directly to its output path
-            npx staticrypt "$f" \
+            echo "→ $f  ⇢  $out"
+            npx -y staticrypt@3 "$f" \
               -p "$SITE_PASSWORD" \
               --salt "$SALT" \
               --config false \
               -o "$out"
+            [[ -s "$out" ]] || { echo "ERROR: StatiCrypt produced no output for $f"; exit 1; }
           done
 
-      # 5) Copy non-HTML assets (do not overwrite encrypted HTML)
+      # 5) Copy non-HTML assets (CSS/JS/img/Pagefind bundle) without touching encrypted HTML
       - name: Copy non-HTML assets
         run: rsync -a --exclude='**/*.html' _site/ encrypted/
 
-      # 6) Prevent Jekyll & verify artifact root has index.html
-      - name: Add .nojekyll
-        run: touch encrypted/.nojekyll
-
-      - name: Verify artifact root
+      # 6) Prevent Jekyll & verify artifact has a root index.html
+      - name: Finalize artifact
         run: |
-          ls -la encrypted | sed -n '1,200p'
-          # list a few encrypted html files for sanity
-          find encrypted -maxdepth 3 -name '*.html' -type f | sed -n '1,25p'
+          touch encrypted/.nojekyll
+          echo "Artifact root:" && ls -la encrypted | sed -n '1,200p'
+          echo "Sample encrypted pages:" && find encrypted -maxdepth 3 -name '*.html' -type f | sed -n '1,25p'
           test -f encrypted/index.html
 
       # 7) Upload artifact for Pages
