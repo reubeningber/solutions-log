@@ -49,6 +49,12 @@ jobs:
           ls -la _site | sed -n '1,200p'
           test -f _site/index.html
 
+      # Debug: count entries in rendered index.html
+      - name: Verify rendered entries exist
+        run: |
+          grep -q 'class="entries-grid"' _site/index.html
+          grep -q 'class="entry"' _site/index.html
+
       # 3) Encrypt EVERY HTML file explicitly (guarantees encrypted/index.html)
       - name: Encrypt with StatiCrypt (file-by-file)
         shell: bash
@@ -74,13 +80,15 @@ jobs:
             rel="${f#_site/}"                # e.g. "index.html" or "entries/foo/index.html"
             out="encrypted/${rel}"
             mkdir -p "$(dirname "$out")"
+            # inside the "Encrypt with StatiCrypt (file-by-file)" step's loop:
             npx -y staticrypt@3 "$f" \
               -p "${{ secrets.SITE_PASSWORD }}" \
               --salt "$SALT" \
-              --remember 30 \
+              --remember 0 \
               --config false \
+              -t src/staticrypt_template.html \
               -o "$out"
-          done
+              done
       
       # Debug: peek at the start of the encrypted index.html
       - name: Peek encrypted index

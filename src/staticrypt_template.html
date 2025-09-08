@@ -1,0 +1,115 @@
+<!doctype html>
+<html class="staticrypt-html" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Protected Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Do not cache -->
+  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="pragma" content="no-cache" />
+  <meta http-equiv="expires" content="0" />
+
+  <style>
+    :root { --bg: #0b0b0c; --fg: #e5e7eb; --muted:#9ca3af; --primary:#3b82f6; }
+    @media (prefers-color-scheme: light) { :root { --bg: #fff; --fg: #0b0b0c; --muted:#6b7280; --primary:#2563eb; } }
+    html,body { height:100%; background: var(--bg); color: var(--fg); }
+    body { margin:0; display:grid; place-items:center; font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
+    .wrap { width:min(92vw, 420px); }
+    .card {
+      background: color-mix(in srgb, var(--bg) 85%, #fff 15%);
+      border: 1px solid color-mix(in srgb, var(--fg) 15%, transparent 85%);
+      border-radius: 14px; padding: 18px 18px 16px; box-shadow: 0 2px 18px rgba(0,0,0,.12);
+    }
+    h1 { margin:.25rem 0 .5rem; font-weight:800; font-size:1.25rem; }
+    .muted { color: var(--muted); font-size:.95rem; }
+    form { display:grid; gap:.6rem; }
+    input[type="password"]{
+      border-radius:12px; border:1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+      padding:.55rem .7rem; background:transparent; color:var(--fg);
+    }
+    button[type="submit"]{
+      border-radius:10px; border:1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+      background: var(--primary); color:#fff; padding:.55rem .8rem; font-weight:700; cursor:pointer;
+    }
+    .error { color:#ef4444; min-height:1.2em; }
+    .foot { margin-top:.5rem; text-align:center; color:var(--muted); font-size:.9rem; }
+    /* hide remember UI: we always remember */
+    #remember-wrap, #remember { display:none !important; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Solutions Log</h1>
+      <p class="muted">Enter the password to unlock.</p>
+      <form id="staticrypt-form">
+        <input id="staticrypt-password" type="password" placeholder="Password" autocomplete="current-password" />
+        <div id="remember-wrap"><label><input id="remember" type="checkbox" checked> Remember me</label></div>
+        <button type="submit">Unlock</button>
+        <div id="staticrypt-error" class="error" aria-live="polite"></div>
+      </form>
+      <p class="foot">Protected</p>
+    </div>
+  </div>
+
+  <!-- StatiCrypt payload & script placeholders (leave these untouched) -->
+  <script>
+    /*[|script|]*/0
+  </script>
+  <script id="staticrypt-data" type="application/json">
+    {
+      "ciphertext": "/*[|ciphertext|]*/0",
+      "iv": "/*[|iv|]*/0",
+      "salt": "/*[|salt|]*/0",
+      "associated_data": "/*[|associated_data|]*/0"
+    }
+  </script>
+
+  <script>
+    // Minimal glue around StatiCrypt’s decrypt() to guarantee full document replacement
+    (function(){
+      const $ = (sel) => document.querySelector(sel);
+      const form = $('#staticrypt-form');
+      const input = $('#staticrypt-password');
+      const error = $('#staticrypt-error');
+      const remember = $('#remember');
+
+      function setErr(msg){ if (error) error.textContent = msg || ""; }
+
+      async function decryptAndRender(passphrase){
+        try {
+          // decrypt() is provided by /*[|script|]*/ injected above
+          const opts = JSON.parse(document.getElementById('staticrypt-data').textContent);
+          const html = await window.staticryptDecrypt(passphrase, opts);
+          if (typeof html !== 'string' || html.trim() === '') throw new Error('Empty decrypted content');
+
+          // Persist "remember me" (always on)
+          try { localStorage.setItem('staticrypt_passphrase', passphrase); } catch(e){}
+
+          // Replace the whole document with the decrypted HTML
+          document.open('text/html', 'replace');
+          document.write(html);
+          document.close();
+        } catch (e) {
+          setErr('Wrong password or content could not be decrypted.');
+          console.error('StatiCrypt decrypt error:', e);
+        }
+      }
+
+      form?.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        const pwd = input?.value || '';
+        setErr('');
+        decryptAndRender(pwd);
+      });
+
+      // Auto-remember path: if we have a stored passphrase, try it immediately
+      try {
+        const stored = localStorage.getItem('staticrypt_passphrase');
+        if (stored) decryptAndRender(stored);
+      } catch(e){}
+    })();
+  </script>
+</body>
+</html>
