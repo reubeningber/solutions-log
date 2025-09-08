@@ -109,8 +109,10 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addWatchTarget("src/assets");
 
   return {
-    pathPrefix: "/solutions-log/", // important for GitHub Pages subpath
+    pathPrefix: "/solutions-log/",
     dir: { input: "src", includes: ".", data: "_data", output: "_site" },
     markdownTemplateEngine: "njk",
+    htmlTemplateEngine: "njk",       // ensure Nunjucks runs for HTML-ish templates
+    templateFormats: ["njk", "md"],  // be explicit
   };
 };

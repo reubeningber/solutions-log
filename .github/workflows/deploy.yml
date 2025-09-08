@@ -33,6 +33,15 @@ jobs:
       # 1) Build Eleventy output to _site
       - name: Build site
         run: npm run build
+      
+      # Debug: peek at the start of the rendered index.html
+      - name: Peek rendered index (pre-encryption)
+        run: |
+          echo "---- _site/index.html (head) ----"
+          sed -n '1,250p' _site/index.html
+          echo "---- entries markers ----"
+          grep -n "entries-grid" -n _site/index.html || true
+          grep -n "entry" -n _site/index.html | sed -n '1,20p' || true
 
       # 2) Sanity check: _site has a root index.html
       - name: Verify _site contents
@@ -72,6 +81,12 @@ jobs:
               --config false \
               -o "$out"
           done
+      
+      # Debug: peek at the start of the encrypted index.html
+      - name: Peek encrypted index
+        run: |
+          echo "---- encrypted/index.html (head) ----"
+          sed -n '1,120p' encrypted/index.html || true
 
       # 4) Copy non-HTML assets (don’t overwrite encrypted HTML)
       - name: Copy non-HTML assets (safety)
