@@ -56,41 +56,32 @@ jobs:
           grep -q 'class="entry"' _site/index.html
 
       # 3) Encrypt EVERY HTML file explicitly (guarantees encrypted/index.html)
-      - name: Encrypt with StatiCrypt (file-by-file)
+      - name: Encrypt with StatiCrypt (file-by-file, deterministic)
         shell: bash
         env:
-          SALT: ${{ secrets.SALT }}               # <-- ensure this secret exists
+          SALT: ${{ secrets.SALT }}
         run: |
           set -euo pipefail
           shopt -s globstar nullglob
 
-          # Clean and prep output dir
           rm -rf encrypted
           mkdir -p encrypted
 
-          # Collect all html files under _site (root + nested)
-          mapfile -t HTML_FILES < <(printf '%s\n' _site/index.html _site/**/*.html | awk '!x[$0]++')
+          # Collect all html files, including unlock-test
+          mapfile -t HTML_FILES < <(printf '%s\n' _site/index.html _site/unlock-test.html _site/**/*.html | awk '!x[$0]++')
+          (( ${#HTML_FILES[@]} )) || { echo "No HTML files found under _site"; exit 1; }
 
-          if [[ ${#HTML_FILES[@]} -eq 0 ]]; then
-            echo "No HTML files found under _site"; exit 1
-          fi
-
-          # Encrypt each file, preserving relative path
           for f in "${HTML_FILES[@]}"; do
-            rel="${f#_site/}"                # e.g. "index.html" or "entries/foo/index.html"
+            rel="${f#_site/}"
             out="encrypted/${rel}"
             mkdir -p "$(dirname "$out")"
-            # inside the "Encrypt with StatiCrypt (file-by-file)" step's loop:
             npx -y staticrypt@3 "$f" \
               -p "${{ secrets.SITE_PASSWORD }}" \
               --salt "$SALT" \
-              --remember 0 \
+              --remember 30 \
               --config false \
-              --template-title "Solutions Log" \
-              --template-instructions "Enter password to unlock." \
-              --template-color-primary "#646b79" \
               -o "$out"
-              done
+          done
       
       # Debug: peek at the start of the encrypted index.html
       - name: Peek encrypted index
