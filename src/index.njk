@@ -44,8 +44,10 @@ permalink: /index.html
     {% endfor %}
   </div>
 
-  <!-- Pagefind renders here -->
-  <div id="search"></div>
+  {% if ENABLE_SEARCH %}
+    <!-- Pagefind renders here -->
+    <div id="search"></div>
+  {% endif %}
 </section>
 
 <script>

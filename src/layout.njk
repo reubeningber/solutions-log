@@ -6,7 +6,8 @@
   <title>{{ title or "Solutions Log" }}</title>
   <meta name="description" content="{{ description or 'A log of the solutions and decisions I drive as an Engineering Manager — showcasing impact beyond code.' }}" />
   <link rel="icon" href="{{ '/assets/favicon.svg' | url }}" type="image/svg+xml">
-  
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Reuben Ingber" />
 
   <!-- Pico Zinc -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.zinc.min.css">
@@ -16,6 +17,7 @@
   <!-- Pagefind UI -->
   <link rel="stylesheet" href="{{ '/_pagefind/pagefind-ui.css' | url }}">
   <script src="{{ '/_pagefind/pagefind-ui.js' | url }}" defer></script>
+
 </head>
 <body>
   <header class="container site-header">

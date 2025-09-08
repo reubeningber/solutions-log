@@ -60,7 +60,11 @@ jobs:
       - name: Copy non-HTML assets (safety)
         run: rsync -a --exclude='**/*.html' _site/ encrypted/
 
-      # 6) Prevent Jekyll & verify artifact has a root index.html
+      # 6) (Optional safety) Remove Pagefind if anything slipped through
+      - name: Remove Pagefind index for protected deploy
+        run: rm -rf encrypted/_pagefind
+
+      # 7) Prevent Jekyll & verify artifact has a root index.html
       - name: Finalize artifact
         run: |
           touch encrypted/.nojekyll
@@ -68,7 +72,7 @@ jobs:
           echo "Sample encrypted pages:" && find encrypted -maxdepth 3 -name '*.html' -type f | sed -n '1,25p'
           test -f encrypted/index.html
 
-      # 7) Upload artifact for Pages
+      # 8) Upload artifact for Pages
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
