@@ -7,7 +7,7 @@ permalink: /index.html
 <section id="entries" class="entries-grid">
   {% for post in collections.entries %}
   <article class="entry"
-    data-tags="{% if post.data.tags and post.data.tags.length %}{% for t in post.data.tags %}{{ t | slugify }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}">
+    data-tags="{% if post.data.tags %}{% for t in post.data.tags %}{{ t | slugify }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}">
     <header class="entry-head">
       <h3 class="entry-title">
         <a href="{{ post.url | url }}">{{ post.data.title }}</a>
@@ -19,10 +19,8 @@ permalink: /index.html
 
     {% if post.data.tags and post.data.tags.length %}
       <div class="tags">
-        {% for t in post.data.tags %}
-          <button class="chip chip-link" type="button"
-                  data-filter="{{ t | slugify }}"
-                  aria-label="Filter by {{ t }}">{{ t }}</button>
+        {% for tag in post.data.tags %}
+          <button class="tag chip" data-filter="{{ tag | slugify }}">{{ tag }}</button>
         {% endfor %}
       </div>
     {% endif %}
@@ -50,59 +48,47 @@ permalink: /index.html
 <script>
 (() => {
   const bar = document.querySelector('.filters-compact');
-  if (!bar) return;
-
-  const buttons = [...bar.querySelectorAll('.tag')];
   const cards = [...document.querySelectorAll('[data-tags]')];
+  const buttons = bar ? [...bar.querySelectorAll('.tag')] : [];
   const noResults = document.getElementById('no-results');
-  const norm = s => (s || '').toString().trim().toLowerCase();
+  const norm = s => (s||'').toString().trim().toLowerCase();
 
   function apply(val){
     const target = norm(val);
+    let shown = 0;
 
-    // Button states
     buttons.forEach(b => {
-      const on = (norm(b.dataset.filter) === target) || (target === 'all' && norm(b.dataset.filter) === 'all');
+      const on = norm(b.dataset.filter) === target || (target === 'all' && norm(b.dataset.filter) === 'all');
       b.classList.toggle('active', on);
       b.setAttribute('aria-pressed', on);
     });
 
-    // Show/hide cards
-    let shown = 0;
     cards.forEach(card => {
-      const list = (card.dataset.tags || '').split(',').map(norm).filter(Boolean);
-      const show = (target === 'all') || list.includes(target);
+      const list = (card.dataset.tags||'').split(',').map(norm).filter(Boolean);
+      const show = target === 'all' || list.includes(target);
       card.hidden = !show;
       if (show) shown++;
     });
 
     if (noResults) noResults.hidden = shown !== 0;
-
-    // If nothing matched (e.g., a stale saved tag), auto-reset to All
-    if (shown === 0 && target !== 'all') {
-      localStorage.removeItem('sl:tag');
-      return apply('all');
-    }
-
+    if (shown === 0 && target !== 'all') return apply('all'); // <- safety
     try { localStorage.setItem('sl:tag', target); } catch(e){}
   }
 
-  // Bar clicks
-  bar.addEventListener('click', (e) => {
+  bar?.addEventListener('click', (e) => {
     const btn = e.target.closest('.tag'); if (!btn) return;
     apply(btn.dataset.filter);
   });
 
-  // Card chip clicks
   document.addEventListener('click', (e) => {
     const chip = e.target.closest('.chip-link'); if (!chip) return;
     apply(chip.dataset.filter);
-    // bar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 
-  // Initialize (prefer saved if valid; else All)
+  // Initialize
   const saved = norm(localStorage.getItem('sl:tag') || 'all');
   const valid = buttons.some(b => norm(b.dataset.filter) === saved) ? saved : 'all';
   apply(valid);
 })();
 </script>
+
