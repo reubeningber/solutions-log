@@ -40,23 +40,40 @@ jobs:
           ls -la _site | sed -n '1,200p'
           test -f _site/index.html
 
-      # 3) Encrypt ALL files in _site (HTML will be encrypted; non-HTML copied)
-      #    IMPORTANT: use the env var STATICRYPT_PASSWORD (no -p), and do not quote the glob.
-      - name: Encrypt with StatiCrypt
+      # 3) Encrypt EVERY HTML file explicitly (guarantees encrypted/index.html)
+      - name: Encrypt with StatiCrypt (file-by-file)
         shell: bash
         env:
-          STATICRYPT_PASSWORD: ${{ secrets.SITE_PASSWORD }}
-          SALT: ${{ secrets.SALT }}
+          SALT: ${{ secrets.SALT }}               # <-- ensure this secret exists
         run: |
           set -euo pipefail
-          : "${STATICRYPT_PASSWORD:?Missing SITE_PASSWORD secret}"
-          : "${SALT:?Missing SALT secret}"
-          npx -y staticrypt@3 _site/* -r \
-            -d encrypted --config false \
-            --salt "$SALT" --remember 30
-        # StatiCrypt puts outputs under ./encrypted/..., including index.html if present
+          shopt -s globstar nullglob
 
-      # 4) If your StatiCrypt version didn't copy non-HTML, ensure they’re present
+          # Clean and prep output dir
+          rm -rf encrypted
+          mkdir -p encrypted
+
+          # Collect all html files under _site (root + nested)
+          mapfile -t HTML_FILES < <(printf '%s\n' _site/index.html _site/**/*.html | awk '!x[$0]++')
+
+          if [[ ${#HTML_FILES[@]} -eq 0 ]]; then
+            echo "No HTML files found under _site"; exit 1
+          fi
+
+          # Encrypt each file, preserving relative path
+          for f in "${HTML_FILES[@]}"; do
+            rel="${f#_site/}"                # e.g. "index.html" or "entries/foo/index.html"
+            out="encrypted/${rel}"
+            mkdir -p "$(dirname "$out")"
+            npx -y staticrypt@3 "$f" \
+              -p "${{ secrets.SITE_PASSWORD }}" \
+              --salt "$SALT" \
+              --remember 30 \
+              --config false \
+              -o "$out"
+          done
+
+      # 4) Copy non-HTML assets (don’t overwrite encrypted HTML)
       - name: Copy non-HTML assets (safety)
         run: rsync -a --exclude='**/*.html' _site/ encrypted/
 
