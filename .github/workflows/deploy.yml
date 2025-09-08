@@ -53,7 +53,8 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          npx -y staticrypt@3 _site/* -r -d encrypted --config false
+          npx -y staticrypt@3 _site/* -r -d encrypted --config false --salt "$SALT" --remember 30
+
           # StatiCrypt puts outputs under ./encrypted/..., including index.html if present
 
       # 5) If your StatiCrypt version didn't copy non-HTML, ensure they’re present
