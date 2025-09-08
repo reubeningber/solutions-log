@@ -68,13 +68,58 @@
 .entry:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.05); }
 
 /* Title | Date */
-.entry-head { display: flex; flex-direction: column; gap: .25rem; margin-bottom: .35rem; }
-@media (min-width: 768px) {
-  .entry-head { display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: .75rem; }
-  .entry-date { justify-self: end; text-align: right; }
+/* Entry header: stack on mobile, align center on desktop */
+.entry-head{
+  display:flex;
+  flex-direction:column;
+  gap:.25rem;
+  margin-bottom:.35rem;
 }
-.entry-title { margin: 0; }
-.entry-title a { font-weight: 700; }
+
+@media (min-width: 768px){
+  .entry-head{
+    display:grid;
+    grid-template-columns: 1fr auto;   /* title | date */
+    column-gap:.75rem;
+    align-items: center;                /* <-- vertical center */
+  }
+  .entry-date{
+    align-self: center;                 /* ensure the pill aligns too */
+  }
+}
+/* Card titles: dark by default, underline + lighter on hover */
+.entry-title { margin: 0; padding: 0; }
+.entry-title a{
+  color: var(--pico-contrast);          /* dark, strong */
+  text-decoration: none;                /* no underline by default */
+  font-weight: 700;                     /* keep the strong title weight */
+  text-underline-offset: 2px;
+  transition: color .14s ease, text-decoration-color .14s ease;
+}
+
+/* Ensure visited stays dark too */
+.entry-title a:visited{
+  color: var(--pico-contrast);
+  text-decoration: none;
+}
+
+/* Hover/active: lighter (accent) + underline */
+.entry-title a:hover,
+.entry-title a:active{
+  color: var(--pico-primary);           /* lighter/accent tone */
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* Keyboard focus: match hover for clarity + a focus ring */
+.entry-title a:focus-visible{
+  color: var(--pico-primary);
+  text-decoration: underline;
+  outline: 2px solid var(--pico-primary);
+  outline-offset: 2px;
+  text-decoration-thickness: 2px;
+}
+/* Date pill */
 .entry-date {
   padding: .2rem .6rem; border-radius: 999px;
   border: 1px solid var(--pico-muted-border-color);
