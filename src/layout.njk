@@ -13,11 +13,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.zinc.min.css">
   <!-- Your custom CSS -->
   <link rel="stylesheet" href="{{ '/assets/styles.css' | url }}" />
-
-  <!-- Pagefind UI -->
-  <link rel="stylesheet" href="{{ '/_pagefind/pagefind-ui.css' | url }}">
-  <script src="{{ '/_pagefind/pagefind-ui.js' | url }}" defer></script>
-
 </head>
 <body>
   <header class="site-header container">
@@ -47,15 +42,5 @@
       <small>© {{ "now" | date("yyyy") }} • Reuben Ingber, Engineering Manager</small>
     </div>
   </footer>
-
-  <script>
-    // Mount Pagefind UI only if #search exists (we moved it to the bottom of the index page)
-    document.addEventListener("DOMContentLoaded", () => {
-      const el = document.getElementById("search");
-      if (el && window.PagefindUI) {
-        new PagefindUI({ element: "#search", showSubResults: true, pageSize: 10 });
-      }
-    });
-  </script>
 </body>
 </html>
