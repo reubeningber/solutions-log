@@ -46,12 +46,15 @@ jobs:
         shell: bash
         env:
           STATICRYPT_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+          SALT: ${{ secrets.SALT }}
         run: |
           set -euo pipefail
-          shopt -s nullglob
-          npx -y staticrypt@3 _site/* -r -d encrypted --config false --salt "$SALT" --remember 30
-
-          # StatiCrypt puts outputs under ./encrypted/..., including index.html if present
+          : "${STATICRYPT_PASSWORD:?Missing SITE_PASSWORD secret}"
+          : "${SALT:?Missing SALT secret}"
+          npx -y staticrypt@3 _site/* -r \
+            -d encrypted --config false \
+            --salt "$SALT" --remember 30
+        # StatiCrypt puts outputs under ./encrypted/..., including index.html if present
 
       # 4) If your StatiCrypt version didn't copy non-HTML, ensure they’re present
       - name: Copy non-HTML assets (safety)
