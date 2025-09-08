@@ -34,17 +34,13 @@ jobs:
       - name: Build site
         run: npm run build
 
-      # 2) Build Pagefind index into _site/_pagefind
-      - name: Build Pagefind index
-        run: npx pagefind --source _site
-
-      # 3) Sanity check: _site has a root index.html
+      # 2) Sanity check: _site has a root index.html
       - name: Verify _site contents
         run: |
           ls -la _site | sed -n '1,200p'
           test -f _site/index.html
 
-      # 4) Encrypt ALL files in _site (HTML will be encrypted; non-HTML copied)
+      # 3) Encrypt ALL files in _site (HTML will be encrypted; non-HTML copied)
       #    IMPORTANT: use the env var STATICRYPT_PASSWORD (no -p), and do not quote the glob.
       - name: Encrypt with StatiCrypt
         shell: bash
@@ -57,15 +53,11 @@ jobs:
 
           # StatiCrypt puts outputs under ./encrypted/..., including index.html if present
 
-      # 5) If your StatiCrypt version didn't copy non-HTML, ensure they’re present
+      # 4) If your StatiCrypt version didn't copy non-HTML, ensure they’re present
       - name: Copy non-HTML assets (safety)
         run: rsync -a --exclude='**/*.html' _site/ encrypted/
 
-      # 6) (Optional safety) Remove Pagefind if anything slipped through
-      - name: Remove Pagefind index for protected deploy
-        run: rm -rf encrypted/_pagefind
-
-      # 7) Prevent Jekyll & verify artifact has a root index.html
+      # 5) Prevent Jekyll & verify artifact has a root index.html
       - name: Finalize artifact
         run: |
           touch encrypted/.nojekyll
@@ -73,7 +65,7 @@ jobs:
           echo "Sample encrypted pages:" && find encrypted -maxdepth 3 -name '*.html' -type f | sed -n '1,25p'
           test -f encrypted/index.html
 
-      # 8) Upload artifact for Pages
+      # 6) Upload artifact for Pages
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

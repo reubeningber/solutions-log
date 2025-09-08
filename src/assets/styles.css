@@ -1,13 +1,6 @@
 /* ===========================
    Header
    =========================== */
-.site-header {
-  position: sticky; top: 0; z-index: 10;
-  background: var(--pico-background-color);
-  border-bottom: 1px solid var(--pico-muted-border-color);
-  padding: 1.25rem 0 .75rem;
-}
-
 /* --- Header polish --- */
 .site-header{
   position: sticky; top: 0; z-index: 10;
@@ -23,14 +16,14 @@
 
 /* Monochrome SVG via CSS mask (uses currentColor) */
 .logo-mask{
-  width: 44px; height: 44px; flex: 0 0 44px;
+  width: 75px; height: 75px; flex: 0 0 75px;
   background-color: currentColor;
   -webkit-mask: var(--logo-url) no-repeat center / contain;
           mask: var(--logo-url) no-repeat center / contain;
 }
 
 /* Text block */
-.hero-text{ min-width: 0; } /* prevents overflow on narrow screens */
+.hero-text{ min-width: 0; }               /* prevents overflow on narrow screens */
 .site-title{
   margin: 0;
   font-weight: 800;
@@ -47,26 +40,13 @@
 /* Slightly larger icon & gap on wide screens */
 @media (min-width: 900px){
   .hero{ gap: 1.25rem; }
-  .logo-mask{ width: 52px; height: 52px; flex-basis: 52px; }
+  .logo-mask{ width: 100px; height: 100px; flex-basis: 100px; }
 }
 
 /* (Optional) soften the color of the whole header mark/text */
 .brand{ color: var(--pico-contrast); } /* or var(--pico-muted-color) for a lighter feel */
 
-.logo-mask{
-  width: 100px; height: 100px; display:inline-block;
-  background-color: currentColor;
-  -webkit-mask: var(--logo-url) no-repeat center / contain;
-          mask: var(--logo-url) no-repeat center / contain;
-}
-/* pick your tone */
-.brand { color: var(--pico-contrast); }
-.site-title { margin: 0; font-size: clamp(1.7rem, 3vw, 2.35rem); font-weight: 800; line-height: 1.05; }
 .site-title a { color: inherit; text-decoration: none; }
-.site-subtitle { margin: .15rem 0 0; color: var(--pico-muted-color); font-size: .95rem; }
-
-.logo, .logo-img { display:inline-flex; align-items:center; justify-content:center; }
-.brand { gap: .7rem; } /* a touch more breathing room */
 
 /* ===========================
    Index: card grid + cards
@@ -234,3 +214,31 @@ hr.meta-sep {
   color: var(--pico-muted-color);
 }
 
+/* Filters: compact chips */
+.filters-compact{
+  display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .45rem;
+  margin:.25rem 0 0;
+}
+.filters-label{
+  margin-right:.25rem; color:var(--pico-muted-color); font-size:.86rem;
+}
+.filters-compact .tag{
+  appearance:none; border:1px solid var(--pico-muted-border-color);
+  background:var(--pico-muted-border-color); color:inherit; cursor:pointer;
+  padding:.26rem .55rem; border-radius:999px; font-size:.9rem; line-height:1.1;
+}
+.filters-compact .tag:hover{ filter:brightness(.98); }
+.filters-compact .tag:focus-visible{
+  outline:2px solid var(--pico-primary); outline-offset:2px;
+}
+.filters-compact .tag.active{
+  background:var(--pico-primary-background);
+  border-color:var(--pico-primary);
+  color:var(--pico-primary-inverse);
+}
+
+/* Tighten the block’s spacing a touch */
+.tools{ margin-top:.6rem; }
+
+button.chip { cursor: pointer; color: inherit; }
+button.chip:hover { filter: brightness(.98); }

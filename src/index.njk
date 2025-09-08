@@ -7,7 +7,7 @@ permalink: /index.html
 
 <section id="entries" class="entries-grid">
   {% for post in collections.entries %}
-  <article class="entry" data-tags="{{ (post.data.tags or []).join('||') }}">
+  <article class="entry" data-tags="{% if post.data.tags and post.data.tags.length %}{% for t in post.data.tags %}{{ t | escape }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}">
     <header class="entry-head">
       <h3 class="entry-title">
         <a href="{{ post.url | url }}">{{ post.data.title }}</a>
@@ -20,7 +20,9 @@ permalink: /index.html
     {% if post.data.tags and post.data.tags.length %}
     <div class="tags">
       {% for t in post.data.tags %}
-        <span class="chip">{{ t }}</span>
+        <button class="chip chip-link" type="button" data-filter="{{ t | escape }}">
+          {{ t }}
+        </button>
       {% endfor %}
     </div>
     {% endif %}
@@ -34,44 +36,71 @@ permalink: /index.html
 
 <p id="no-results" hidden><em>No entries match this filter.</em></p>
 
-<!-- Tools at the bottom: compact filters + search -->
-<section class="tools compact-tools">
-  <!-- Pagefind renders here -->
-  <div id="search"></div>
-  
-  <!-- Tag filters -->
-  <div class="filters">
-    <strong>Filter by tag:</strong>
-    <button data-tag="all" class="tag active">All</button>
+<div class="tools">
+  <div class="filters filters-compact" role="radiogroup" aria-label="Filter by tag">
+    <strong class="filters-label">Filter:</strong>
+    <button class="tag active" data-filter="all" aria-pressed="true">All</button>
     {% for tag in collections.entries | uniquetags %}
-      <button class="tag" data-tag="{{ tag }}">{{ tag }}</button>
+      <button class="tag" data-filter="{{ tag | escape }}" aria-pressed="false">{{ tag }}</button>
     {% endfor %}
   </div>
-</section>
+</div>
 
 <script>
-  // Tag filter (unchanged)
-  const tagButtons = document.querySelectorAll(".filters .tag");
-  const cards = document.querySelectorAll(".entries-grid .entry");
-  const noResults = document.getElementById("no-results");
+(() => {
+  const bar = document.querySelector('.filters-compact');
+  if (!bar) return;
 
-  function applyFilter(tag) {
+  const buttons = [...bar.querySelectorAll('.tag')];
+  const cards = [...document.querySelectorAll('[data-tags]')];
+  const noResults = document.getElementById('no-results');
+
+  const norm = (s) => (s || '').toString().trim().toLowerCase();
+
+  function apply(val){
+    const target = norm(val);
+
+    // Toggle button states
+    buttons.forEach(b => {
+      const on = (norm(b.dataset.filter) === target) || (target === 'all' && norm(b.dataset.filter) === 'all');
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on);
+    });
+
+    // Show/hide cards by normalized tag match
     let shown = 0;
     cards.forEach(card => {
-      const set = (card.dataset.tags || "").split("||").filter(Boolean);
-      const match = tag === "all" || set.includes(tag);
-      card.hidden = !match;
-      if (match) shown++;
+      const list = (card.dataset.tags || '')
+        .split(',')
+        .map(norm)
+        .filter(Boolean);
+      const show = (target === 'all') || list.includes(target);
+      card.hidden = !show;
+      if (show) shown++;
     });
-    noResults.hidden = shown !== 0;
+
+    if (noResults) noResults.hidden = shown !== 0;
+
+    try { localStorage.setItem('sl:tag', val); } catch (e) {}
   }
 
-  tagButtons.forEach(btn => btn.addEventListener("click", () => {
-    tagButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    applyFilter(btn.dataset.tag);
-  }));
+  bar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tag');
+    if (!btn) return;
+    apply(btn.dataset.filter);
+  });
 
-  // Initialize (show all by default)
-  applyFilter("all");
+  // Initialize from saved choice (if valid), else 'all'
+  const saved = (localStorage.getItem('sl:tag') || 'all');
+  const valid = buttons.some(b => norm(b.dataset.filter) === norm(saved)) ? saved : 'all';
+  apply(valid);
+ 
+  document.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip-link');
+    if (!chip) return;
+    apply(chip.dataset.filter);
+    // Optionally bring the filter bar into view
+    // bar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+})();
 </script>
