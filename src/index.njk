@@ -10,7 +10,7 @@ permalink: /index.html
   <article class="entry" data-tags="{{ (post.data.tags or []).join('||') }}">
     <header class="entry-head">
       <h3 class="entry-title">
-        <a href="{{ post.url }}">{{ post.data.title }}</a>
+        <a href="{{ post.url | url }}">{{ post.data.title }}</a>
       </h3>
       <time datetime="{{ post.date | date('yyyy-MM-dd') }}" class="entry-date">
         {{ post.date | date("yyyy-MM-dd") }}
@@ -36,6 +36,10 @@ permalink: /index.html
 
 <!-- Tools at the bottom: compact filters + search -->
 <section class="tools compact-tools">
+  <!-- Pagefind renders here -->
+  <div id="search"></div>
+  
+  <!-- Tag filters -->
   <div class="filters">
     <strong>Filter by tag:</strong>
     <button data-tag="all" class="tag active">All</button>
@@ -43,11 +47,6 @@ permalink: /index.html
       <button class="tag" data-tag="{{ tag }}">{{ tag }}</button>
     {% endfor %}
   </div>
-
-  {% if ENABLE_SEARCH %}
-    <!-- Pagefind renders here -->
-    <div id="search"></div>
-  {% endif %}
 </section>
 
 <script>

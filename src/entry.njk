@@ -32,11 +32,10 @@ layout: layout.njk
   <footer class="entry-meta">
     {% if refItems and refItems.length %}
     <div class="entry-refs inline-refs">
-      {# <strong>References</strong> #}
       <div class="refs-list">
         {% for r in refItems %}
           {% if r.url %}
-            <a href="{{ r.url }}" target="_blank" rel="noopener">
+            <a href="{{ r.url | url }}" target="_blank" rel="noopener">
               {{ r.label }}
               <svg class="icon-link" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 1 0-7.07-7.07L10 5" />
