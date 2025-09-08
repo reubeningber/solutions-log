@@ -38,46 +38,40 @@ jobs:
       - name: Build Pagefind index
         run: npx pagefind --source _site
 
-      # 3) Sanity check: _site has a root index.html
+      # 3) Verify Eleventy output has a root index.html
       - name: Verify _site contents
         run: |
           ls -la _site | sed -n '1,200p'
           test -f _site/index.html
 
-      # 4) Encrypt HTML files DIRECTLY into encrypted/
-      #    Use bash glob expansion so encrypted/index.html is created.
+      # 4) Encrypt ALL HTML directly into encrypted/
+      #    IMPORTANT: do NOT quote the glob; Bash must expand _site/* here.
       - name: Encrypt HTML with StatiCrypt
         shell: bash
         env:
           SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
           SALT: ${{ secrets.SALT }}
         run: |
-          shopt -s globstar nullglob
-          # Collect all html files (root index plus nested)
-          HTML_FILES=(_site/index.html _site/**/*.html)
-          # If no HTML files, fail early
-          (( ${#HTML_FILES[@]} )) || { echo "No HTML files found in _site"; exit 1; }
-          npx staticrypt "${HTML_FILES[@]}" -p "$SITE_PASSWORD" --salt "$SALT" \
-             --recursive --template-title "Solutions Log" --config false \
-             --output-dir encrypted
+          shopt -s nullglob      # make unmatched globs expand to empty
+          npx staticrypt _site/* -r -p "$SITE_PASSWORD" --salt "$SALT" \
+            -d encrypted --template-title "Solutions Log" --config false
 
-      # 5) Copy non-HTML assets (exclude *.html so we don't overwrite encrypted pages)
+      # 5) Copy non-HTML assets (CSS, JS, images, Pagefind bundle)
       - name: Copy non-HTML assets
         run: rsync -a --exclude='**/*.html' _site/ encrypted/
 
-      # 6) Prevent Jekyll
+      # 6) Prevent Jekyll & verify artifact root has index.html
       - name: Add .nojekyll
         run: touch encrypted/.nojekyll
 
-      # 7) Verify artifact root has index.html
       - name: Verify artifact root
         run: |
           ls -la encrypted | sed -n '1,200p'
-          # Show where index files are too (debug)
-          find encrypted -maxdepth 2 -name 'index.html' -type f -print
+          # show any index.html we have (debug)
+          find encrypted -maxdepth 3 -name 'index.html' -type f -print
           test -f encrypted/index.html
 
-      # 8) Upload artifact for Pages
+      # 7) Upload artifact for Pages
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
