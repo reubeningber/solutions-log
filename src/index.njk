@@ -6,8 +6,10 @@ permalink: /index.html
 ---
 
 <section id="entries" class="entries-grid">
+  <!-- debug: {{ collections.entries | length }} entries -->
   {% for post in collections.entries %}
-  <article class="entry" data-tags="{% if post.data.tags and post.data.tags.length %}{% for t in post.data.tags %}{{ t | slug }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}">
+  <article class="entry"
+    data-tags="{% if post.data.tags and post.data.tags.length %}{% for t in post.data.tags %}{{ t | slugify }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}">
     <header class="entry-head">
       <h3 class="entry-title">
         <a href="{{ post.url | url }}">{{ post.data.title }}</a>
@@ -20,7 +22,9 @@ permalink: /index.html
     {% if post.data.tags and post.data.tags.length %}
       <div class="tags">
         {% for t in post.data.tags %}
-          <button class="chip chip-link" type="button" data-filter="{{ t | slug }}" aria-label="Filter by {{ t }}">{{ t }}</button>
+          <button class="chip chip-link" type="button"
+                  data-filter="{{ t | slugify }}"
+                  aria-label="Filter by {{ t }}">{{ t }}</button>
         {% endfor %}
       </div>
     {% endif %}
@@ -40,7 +44,7 @@ permalink: /index.html
     <strong class="filters-label">Filter:</strong>
     <button class="tag active" data-filter="all" aria-pressed="true">All</button>
     {% for tag in collections.entries | uniquetags %}
-      <button class="tag" data-filter="{{ tag | slug }}" aria-pressed="false">{{ tag }}</button>
+      <button class="tag" data-filter="{{ tag | slugify }}" aria-pressed="false">{{ tag }}</button>
     {% endfor %}
   </div>
 </div>
@@ -53,18 +57,19 @@ permalink: /index.html
   const buttons = [...bar.querySelectorAll('.tag')];
   const cards = [...document.querySelectorAll('[data-tags]')];
   const noResults = document.getElementById('no-results');
-
   const norm = s => (s || '').toString().trim().toLowerCase();
 
   function apply(val){
     const target = norm(val);
-    // toggle button states
+
+    // Button states
     buttons.forEach(b => {
       const on = (norm(b.dataset.filter) === target) || (target === 'all' && norm(b.dataset.filter) === 'all');
       b.classList.toggle('active', on);
       b.setAttribute('aria-pressed', on);
     });
-    // show/hide cards
+
+    // Show/hide cards
     let shown = 0;
     cards.forEach(card => {
       const list = (card.dataset.tags || '').split(',').map(norm).filter(Boolean);
@@ -72,17 +77,19 @@ permalink: /index.html
       card.hidden = !show;
       if (show) shown++;
     });
+
     if (noResults) noResults.hidden = shown !== 0;
 
-    // If nothing matched (e.g., stale saved tag), fall back to ALL
+    // If nothing matched (e.g., a stale saved tag), auto-reset to All
     if (shown === 0 && target !== 'all') {
+      localStorage.removeItem('sl:tag');
       return apply('all');
     }
 
     try { localStorage.setItem('sl:tag', target); } catch(e){}
   }
 
-  // Filter bar clicks
+  // Bar clicks
   bar.addEventListener('click', (e) => {
     const btn = e.target.closest('.tag'); if (!btn) return;
     apply(btn.dataset.filter);
@@ -92,11 +99,10 @@ permalink: /index.html
   document.addEventListener('click', (e) => {
     const chip = e.target.closest('.chip-link'); if (!chip) return;
     apply(chip.dataset.filter);
-    // Optional: scroll the filter bar into view
     // bar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 
-  // Initialize from saved choice (only if present), else 'all'
+  // Initialize (prefer saved if valid; else All)
   const saved = norm(localStorage.getItem('sl:tag') || 'all');
   const valid = buttons.some(b => norm(b.dataset.filter) === saved) ? saved : 'all';
   apply(valid);
