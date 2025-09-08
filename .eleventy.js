@@ -33,6 +33,11 @@ module.exports = function (eleventyConfig) {
     return counts;
   });
 
+  eleventyConfig.addFilter("stripContext", (str) => {
+    if (!str) return "";
+    return String(str).replace(/^\s*context\b\s*[:\-–—]?\s*/i, "");
+  });
+
   eleventyConfig.addFilter("isUrl", (v) =>
     typeof v === "string" && /^https?:\/\//i.test(v)
   );
