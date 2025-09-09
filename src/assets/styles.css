@@ -127,6 +127,17 @@
   font-size: .82rem; line-height: 1; white-space: nowrap;
 }
 
+.entry-updates{
+  margin-top:1rem; padding-top:.75rem;
+  border-top:1px solid var(--pico-muted-border-color);
+}
+.entry-updates .h6{ margin:0 0 .5rem; color:var(--pico-muted-color); font-weight:700; }
+.updates{ list-style:none; margin:.25rem 0 0; padding:0; display:grid; gap:.4rem; }
+.update{ display:flex; flex-wrap:wrap; gap:.5rem; align-items:baseline; }
+.update-date{ font-size:.86rem; color:var(--pico-muted-color); }
+.update-text{ line-height:1.35; }
+.update-refs strong{ margin:0 .35rem; color:var(--pico-muted-color); }
+
 /* Chips + excerpt */
 .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: .25rem 0 .6rem; }
 .chip {

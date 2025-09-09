@@ -5,6 +5,11 @@ tags: ["Cross-Team Alignment", "Process Improvement", "Risk Mitigation"]
 references:
   - ET-2190
   - muse-cms 2478
+updates: 
+  - date: 2025-09-08
+    text: "At my urging, Chase led a walkthrough of his implementation of the new slide byline work for Engagement Engineers. This helped us better understand Creations mindset and will help us implement projects in the future."
+    references: 
+      - muse-cms 2559
 ---
 
 ## Context

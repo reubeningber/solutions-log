@@ -19,6 +19,37 @@ layout: layout.njk
     {{ content | safe }}
   </main>
 
+  {# --- Updates timeline (optional, shown only if `updates` exists) --- #}
+  {% if updates and updates.length %}
+    <section class="entry-updates">
+      <h3 class="h6">Updates</h3>
+      <ol class="updates">
+        {# newest → oldest (reverse original order) #}
+        {% for u in updates | reverse %}
+          <li class="update">
+            <time class="update-date">{{ u.date | date("yyyy-MM-dd") }}</time>
+            <span class="update-text">{{ u.text }}</span>
+
+            {# Optional inline refs per update entry #}
+            {% set urefs = u.references | normalizeRefs %}
+            {% if urefs and urefs.length %}
+              <span class="update-refs">
+                <strong>•</strong>
+                {% for r in urefs %}
+                  {% if r.url %}
+                    <a href="{{ r.url }}" target="_blank" rel="noopener">{{ r.label }}</a>{% if not loop.last %} | {% endif %}
+                  {% else %}
+                    <span>{{ r.text }}</span>{% if not loop.last %} | {% endif %}
+                  {% endif %}
+                {% endfor %}
+              </span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    </section>
+  {% endif %}
+
   {# Gather references from either 'references' (array) or 'reference' (string) #}
   {% set refItems = [] %}
   {% if references %}
