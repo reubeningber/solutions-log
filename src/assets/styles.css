@@ -127,16 +127,64 @@
   font-size: .82rem; line-height: 1; white-space: nowrap;
 }
 
+/* --- Updates block --- */
 .entry-updates{
   margin-top:1rem; padding-top:.75rem;
   border-top:1px solid var(--pico-muted-border-color);
 }
 .entry-updates .h6{ margin:0 0 .5rem; color:var(--pico-muted-color); font-weight:700; }
-.updates{ list-style:none; margin:.25rem 0 0; padding:0; display:grid; gap:.4rem; }
-.update{ display:flex; flex-wrap:wrap; gap:.5rem; align-items:baseline; }
-.update-date{ font-size:.86rem; color:var(--pico-muted-color); }
+
+/* List layout: date | body */
+.updates{
+  list-style:none; margin:.25rem 0 0; padding:0;
+  display:grid; gap:0; /* zero gap so the vertical line looks continuous */
+}
+.update{
+  display:grid; grid-template-columns: auto 1fr; column-gap:.75rem; align-items:flex-start;
+  /* A bit of vertical rhythm */
+  padding:.25rem 0;
+}
+
+/* Date pill: reuse entry-date look */
+.update-date,
+.entry-date{
+  padding:.2rem .6rem;
+  border-radius:999px;
+  border:1px solid var(--pico-muted-border-color);
+  background:var(--pico-muted-border-color);
+  font-size:.82rem; line-height:1; white-space:nowrap;
+}
+
+/* Indented body with a vertical line */
+.update-body{
+  border-left:2px solid var(--pico-muted-border-color);
+  padding-left:.75rem;
+  margin-left:.1rem;  /* tiny offset so the line feels centered between date & text */
+}
 .update-text{ line-height:1.35; }
-.update-refs strong{ margin:0 .35rem; color:var(--pico-muted-color); }
+
+/* Inline references (same look as entry references) */
+.inline-refs{ display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; margin-top:.4rem; }
+.inline-refs strong{ margin-right:.25rem; }
+
+.refs-list{
+  display:inline-flex; flex-wrap:wrap; align-items:center;
+}
+.refs-list a, .refs-list span{ white-space:nowrap; }
+.refs-list > * + *{ margin-left:.5rem; }
+.refs-list > * + *::before{
+  content:"|"; margin-right:.5rem; color:var(--pico-muted-color);
+}
+
+/* Link icon sizing (shared) */
+.icon-link{ width:.95em; height:.95em; stroke:currentColor; margin-left:.25rem; }
+
+/* Thin separator between update refs and next content */
+hr.meta-sep{
+  margin:.6rem 0 0;
+  border:none; border-top:1px solid var(--pico-muted-border-color);
+}
+
 
 /* Chips + excerpt */
 .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: .25rem 0 .6rem; }

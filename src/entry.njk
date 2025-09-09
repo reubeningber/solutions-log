@@ -18,39 +18,7 @@ layout: layout.njk
   <main data-pagefind-body class="entry-prose">
     {{ content | safe }}
   </main>
-
-  {# --- Updates timeline (optional, shown only if `updates` exists) --- #}
-  {% if updates and updates.length %}
-    <section class="entry-updates">
-      <h3 class="h6">Updates</h3>
-      <ol class="updates">
-        {# newest → oldest (reverse original order) #}
-        {% for u in updates | reverse %}
-          <li class="update">
-            <time class="update-date">{{ u.date | date("yyyy-MM-dd") }}</time>
-            <span class="update-text">{{ u.text }}</span>
-
-            {# Optional inline refs per update entry #}
-            {% set urefs = u.references | normalizeRefs %}
-            {% if urefs and urefs.length %}
-              <span class="update-refs">
-                <strong>•</strong>
-                {% for r in urefs %}
-                  {% if r.url %}
-                    <a href="{{ r.url }}" target="_blank" rel="noopener">{{ r.label }}</a>{% if not loop.last %} | {% endif %}
-                  {% else %}
-                    <span>{{ r.text }}</span>{% if not loop.last %} | {% endif %}
-                  {% endif %}
-                {% endfor %}
-              </span>
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ol>
-    </section>
-  {% endif %}
-
-  {# Gather references from either 'references' (array) or 'reference' (string) #}
+{# Gather references from either 'references' (array) or 'reference' (string) #}
   {% set refItems = [] %}
   {% if references %}
     {% set refItems = references %}
@@ -59,9 +27,8 @@ layout: layout.njk
   {% endif %}
 
   {% set refItems = (references or reference) | normalizeRefs %}
-
-  <footer class="entry-meta">
     {% if refItems and refItems.length %}
+    <hr class="meta-sep" />
     <div class="entry-refs inline-refs">
       <div class="refs-list">
         {% for r in refItems %}
@@ -81,16 +48,59 @@ layout: layout.njk
     </div>
     {% endif %}
 
-    {% if refItems and refItems.length %}
-      <hr class="meta-sep">
-    {% endif %}
+  {# --- Updates timeline (optional, shown only if `updates` exists) --- #}
+  {% if updates and updates.length %}
+    <section class="entry-updates">
+      <h3 class="h6">Updates</h3>
 
+      <ol class="updates">
+        {% for u in updates | reverse %}
+          <li class="update">
+            <!-- Date pill: reuse entry-date styling -->
+            <time class="update-date entry-date">{{ u.date | date("yyyy-MM-dd") }}</time>
+
+            <!-- Indented body with vertical line -->
+            <div class="update-body">
+              <div class="update-text">{{ u.text }}</div>
+
+              {% set urefs = u.references | normalizeRefs %}
+              {% if urefs and urefs.length %}
+                <div class="inline-refs">
+                  <span class="refs-list">
+                    {% for r in urefs %}
+                      {% if r.url %}
+                        <a href="{{ r.url }}" target="_blank" rel="noopener">
+                          {{ r.label }}
+                          <!-- optional link icon, if you use it elsewhere -->
+                          <svg class="icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M10 13a5 5 0 0 0 7.07 0l1.86-1.86a5 5 0 1 0-7.07-7.07L10.9 5.93"/>
+                            <path d="M14 11a5 5 0 0 0-7.07 0L5.07 12.9a5 5 0 1 0 7.07 7.07l1.41-1.41"/>
+                          </svg>
+                        </a>
+                      {% else %}
+                        <span>{{ r.text }}</span>
+                      {% endif %}
+                    {% endfor %}
+                  </span>
+                </div>
+                {# separator only if there's more than 1 update and this isn't the last #}
+                {% if total > 1 and not loop.last %}
+                  <hr class="meta-sep" />
+                {% endif %}
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ol>
+    </section>
+  {% endif %}
+
+  <footer class="entry-meta">  
     {% if tags and tags.length %}
-    <div class="tags">
-      {% for t in tags %}<span class="chip">{{ t }}</span>{% endfor %}
-    </div>
+      <div class="tags">
+        {% for t in tags %}<span class="chip">{{ t }}</span>{% endfor %}
+      </div>
     {% endif %}
-
     <div class="entry-footer-actions">
       <a href="{{ '/' | url }}" role="button" class="back-btn">Back to list</a>
     </div>
