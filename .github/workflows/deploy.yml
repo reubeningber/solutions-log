@@ -1,4 +1,4 @@
-name: Build, Encrypt, and Deploy (StatiCrypt)
+name: Build & Deploy (GitHub Pages)
 
 on:
   push:
@@ -33,80 +33,30 @@ jobs:
       # 1) Build Eleventy output to _site
       - name: Build site
         run: npm run build
-      
-      # Debug: peek at the start of the rendered index.html
-      - name: Peek rendered index (pre-encryption)
-        run: |
-          echo "---- _site/index.html (head) ----"
-          sed -n '1,250p' _site/index.html
-          echo "---- entries markers ----"
-          grep -n "entries-grid" -n _site/index.html || true
-          grep -n "entry" -n _site/index.html | sed -n '1,20p' || true
 
-      # 2) Sanity check: _site has a root index.html
+      # (Optional) If you add Pagefind back later:
+      # - name: Build Pagefind index
+      #   run: npx pagefind --source _site
+
+      # 2) Make sure GitHub Pages serves static files as-is
+      - name: Add .nojekyll
+        run: touch _site/.nojekyll
+
+      # (Optional) If you're using a custom domain with Cloudflare, uncomment:
+      - name: Add CNAME
+        run: echo "solutions.reubeningber.com" > _site/CNAME
+
+      # 3) Sanity check: _site has a root index.html
       - name: Verify _site contents
         run: |
           ls -la _site | sed -n '1,200p'
           test -f _site/index.html
 
-      # Debug: count entries in rendered index.html
-      - name: Verify rendered entries exist
-        run: |
-          grep -q 'class="entries-grid"' _site/index.html
-          grep -q 'class="entry"' _site/index.html
-
-      # 3) Encrypt EVERY HTML file explicitly (guarantees encrypted/index.html)
-      - name: Encrypt with StatiCrypt (file-by-file, deterministic)
-        shell: bash
-        env:
-          SALT: ${{ secrets.SALT }}
-        run: |
-          set -euo pipefail
-          shopt -s globstar nullglob
-
-          rm -rf encrypted
-          mkdir -p encrypted
-
-          # Collect all html files, including unlock-test
-          mapfile -t HTML_FILES < <(printf '%s\n' _site/index.html _site/unlock-test.html _site/**/*.html | awk '!x[$0]++')
-          (( ${#HTML_FILES[@]} )) || { echo "No HTML files found under _site"; exit 1; }
-
-          for f in "${HTML_FILES[@]}"; do
-            rel="${f#_site/}"
-            out="encrypted/${rel}"
-            mkdir -p "$(dirname "$out")"
-            npx -y staticrypt@3 "$f" \
-              -p "${{ secrets.SITE_PASSWORD }}" \
-              --salt "$SALT" \
-              --remember 30 \
-              --config false \
-              -t src/staticrypt_template.html \
-              -o "$out"
-          done
-      
-      # Debug: peek at the start of the encrypted index.html
-      - name: Peek encrypted index
-        run: |
-          echo "---- encrypted/index.html (head) ----"
-          sed -n '1,120p' encrypted/index.html || true
-
-      # 4) Copy non-HTML assets (don’t overwrite encrypted HTML)
-      - name: Copy non-HTML assets (safety)
-        run: rsync -a --exclude='**/*.html' _site/ encrypted/
-
-      # 5) Prevent Jekyll & verify artifact has a root index.html
-      - name: Finalize artifact
-        run: |
-          touch encrypted/.nojekyll
-          echo "Artifact root:" && ls -la encrypted | sed -n '1,200p'
-          echo "Sample encrypted pages:" && find encrypted -maxdepth 3 -name '*.html' -type f | sed -n '1,25p'
-          test -f encrypted/index.html
-
-      # 6) Upload artifact for Pages
+      # 4) Upload artifact for Pages
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: encrypted
+          path: _site
 
   deploy:
     needs: build

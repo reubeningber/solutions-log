@@ -109,7 +109,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addWatchTarget("src/assets");
 
   return {
-    pathPrefix: "/solutions-log/",
+    pathPrefix: "/",
     dir: { input: "src", includes: ".", data: "_data", output: "_site" },
     markdownTemplateEngine: "njk",
     htmlTemplateEngine: "njk",       // ensure Nunjucks runs for HTML-ish templates
