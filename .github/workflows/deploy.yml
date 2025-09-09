@@ -80,6 +80,7 @@ jobs:
               --salt "$SALT" \
               --remember 30 \
               --config false \
+              -t src/staticrypt_template.html \
               -o "$out"
           done
       
