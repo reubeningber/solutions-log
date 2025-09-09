@@ -25,12 +25,14 @@ npm run build    # outputs to _site/
 ```
 
 ## 📁 Project layout
+```
 src/
   assets/              # static assets (copied to /assets)
   index.njk            # homepage (cards + filters)
   entry.njk            # single entry layout
   content/             # your markdown entries (YYYY-MM-DD-slug.md)
 .eleventy.js           # Eleventy config (collections, filters, passthrough)
+```
 
 ## ✍️ Writing an entry
 Create a file in `src/content/` named `YYYY-MM-DD-title.md`:
